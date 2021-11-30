@@ -692,7 +692,7 @@ if ( last_data_was_ctrl == 1)
 	case 0x80 ... 0x9f: if (debug) { sprintf(debugbuf,"load digit counter:%d\n\r",data-0x80); lisy80_debug(debugbuf); }
     		display_send_byte_torow( data, LD1_was_set, LD2_was_set );
 		break;
-	case 0xc0 ... 0xdf: //if (debug) fprintf(stderr,"load buffer pointer reg with:%d\n\r",data&0x1f); //lower five bits
+	case 0xc0 ... 0xdf: if (debug) fprintf(stderr,"load buffer pointer reg with:%d\n\r",data&0x1f); //lower five bits
 		//dont forget to send byte for load buffer pointer as well
     		display_send_byte_torow( data, LD1_was_set, LD2_was_set );
 		if (LD1_was_set)

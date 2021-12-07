@@ -1613,10 +1613,11 @@ for(i=0; i<=5;i++)
 
 //LAMPS construct the filename
 //Lamp ;Line of LED;LED Number;Comment
-sprintf(file_name,"%s%s",LISYH_MAPPING_PATH,LISYH_SS_LAMP_MAPPING_FILE);
 //do we use a variant for testing?
 if (variant > 0)
-sprintf(file_name,"%s%s_%02d",LISYH_MAPPING_PATH,LISYH_SS_LAMP_MAPPING_FILE,variant);
+  sprintf(file_name,"%s%s_%02d.csv",LISYH_MAPPING_PATH,LISYH_SS_LAMP_MAPPING_FILE,variant);
+else
+  sprintf(file_name,"%s%s.csv",LISYH_MAPPING_PATH,LISYH_SS_LAMP_MAPPING_FILE);
 
 
  fstream = fopen(file_name,"r");
@@ -1627,6 +1628,7 @@ sprintf(file_name,"%s%s_%02d",LISYH_MAPPING_PATH,LISYH_SS_LAMP_MAPPING_FILE,vari
   else
   {
    first_line = 1;
+   fprintf(stderr,"LISY_Home: reading %s for lamp mapping\n",file_name);
    while( (line=fgets(buffer,sizeof(buffer),fstream))!=NULL)
    {
      if (first_line) { first_line=0; continue; } //skip first line (Header)
@@ -1644,7 +1646,12 @@ sprintf(file_name,"%s%s_%02d",LISYH_MAPPING_PATH,LISYH_SS_LAMP_MAPPING_FILE,vari
 	 led_rgbw_color[ledline][led].green = atoi(strtok(NULL, ";"));
 	 led_rgbw_color[ledline][led].blue = atoi(strtok(NULL, ";"));
 	 led_rgbw_color[ledline][led].white = atoi(strtok(NULL, ";"));
-printf("RTH: Map Lamp %d TO line:%d led:%d %d %d %d %d\n",no,ledline,led,led_rgbw_color[ledline][led].red,led_rgbw_color[ledline][led].green,led_rgbw_color[ledline][led].blue,led_rgbw_color[ledline][led].white);
+  //debug
+  if ( ls80dbg.bitv.lamps )
+  {
+    sprintf(debugbuf,"Map Lamp %d TO line:%d led:%d %d %d %d %d\n",no,ledline,led,led_rgbw_color[ledline][led].red,led_rgbw_color[ledline][led].green,led_rgbw_color[ledline][led].blue,led_rgbw_color[ledline][led].white);
+    lisy80_debug(debugbuf);
+  }
      }
    } //while
    fclose(fstream);
@@ -1675,10 +1682,11 @@ for(i=0; i<20;i++)
 
 //COILS construct the filename
 //coil ;coil Number;Comment
-sprintf(file_name,"%s%s",LISYH_MAPPING_PATH,LISYH_SS_COIL_MAPPING_FILE);
 //do we use a variant for testing?
 if (variant > 0)
-sprintf(file_name,"%s%s_%02d",LISYH_MAPPING_PATH,LISYH_SS_COIL_MAPPING_FILE,variant);
+   sprintf(file_name,"%s%s_%02d.csv",LISYH_MAPPING_PATH,LISYH_SS_COIL_MAPPING_FILE,variant);
+else
+   sprintf(file_name,"%s%s.csv",LISYH_MAPPING_PATH,LISYH_SS_COIL_MAPPING_FILE);
 
  fstream = fopen(file_name,"r");
   if(fstream == NULL)
@@ -1688,6 +1696,7 @@ sprintf(file_name,"%s%s_%02d",LISYH_MAPPING_PATH,LISYH_SS_COIL_MAPPING_FILE,vari
   else
   {
    first_line = 1;
+   fprintf(stderr,"LISY_Home: reading %s for coil mapping\n",file_name);
    while( (line=fgets(buffer,sizeof(buffer),fstream))!=NULL)
    {
      if (first_line) { first_line=0; continue; } //skip first line (Header)
@@ -1731,10 +1740,11 @@ for(i=0; i<20;i++)
 
 //COILS construct the filename
 //coil ;coil Number;Comment
-sprintf(file_name,"%s%s",LISYH_MAPPING_PATH,LISYH_SS_SPECIAL_COIL_MAPPING_FILE);
 //do we use a variant for testing?
 if (variant > 0)
-sprintf(file_name,"%s%s_%02d",LISYH_MAPPING_PATH,LISYH_SS_SPECIAL_COIL_MAPPING_FILE,variant);
+   sprintf(file_name,"%s%s_%02d.csv",LISYH_MAPPING_PATH,LISYH_SS_SPECIAL_COIL_MAPPING_FILE,variant);
+else
+   sprintf(file_name,"%s%s.csv",LISYH_MAPPING_PATH,LISYH_SS_SPECIAL_COIL_MAPPING_FILE);
 
  fstream = fopen(file_name,"r");
   if(fstream == NULL)
@@ -1744,6 +1754,7 @@ sprintf(file_name,"%s%s_%02d",LISYH_MAPPING_PATH,LISYH_SS_SPECIAL_COIL_MAPPING_F
   else
   {
    first_line = 1;
+   fprintf(stderr,"LISY_Home: reading %s for special coil mapping\n",file_name);
    while( (line=fgets(buffer,sizeof(buffer),fstream))!=NULL)
    {
      if (first_line) { first_line=0; continue; } //skip first line (Header)

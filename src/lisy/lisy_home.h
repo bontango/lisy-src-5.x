@@ -66,10 +66,6 @@ void lisy_home_ss_mom_coil_set( unsigned char value);
 void lisy_home_ss_cont_coil_set( unsigned char cont_data);
 void lisy_home_ss_send_led_colors( void);
 
-//starship wheel scores
-void wheel_score( int display, char *data);
-
-
 //the IDs for the event handler
 #define LISY_HOME_EVENT_INIT 0
 #define LISY_HOME_EVENT_SOUND 1

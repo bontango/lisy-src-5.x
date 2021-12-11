@@ -304,36 +304,3 @@ void lisy_home_ss_send_led_colors( void)
  }
 }
 
-//set the scoring wheel to value
-//6digit version only, ignoring digit 1
-void wheel_score( int display, char *data)
-{
-
-   int i,k,pos[5];
-   int delay_needed = 0;
-
-   // -48 to get an int out of the ascii code ( 0..9)
-   for(i=0; i<5; i++) pos[i] = data[i] - 48;
-
-   //set 5 digits
-   //maximum 9 steps
-   for(i=0; i<=9; i++)
-      {
-        for(k=0; k<=4; k++) 
-           {
-	     if ( pos[k] > 0 )
-		{
-		  lisyH_special_coil_pulse(k+5); ////we have special coils 5..9
-		  pos[k] = pos[k] -1;
-		  delay_needed = 1;
-		}  
-           }
-	if ( delay_needed )
-	  {
-	    delay(500);
-	    delay_needed = 0;
-	  }
-	}
-}
-
-

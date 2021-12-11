@@ -320,6 +320,11 @@ void lisyH_special_coil_pulse ( int coil )
 
  if ( lisy_home_ss_special_coil_map[coil].mapped_to_coil != 0)
  {
+   if (  ls80dbg.bitv.coils )
+   {
+   	 sprintf(debugbuf,"pulsed special solenoid: %d(org:%d)",lisy_home_ss_special_coil_map[coil].mapped_to_coil,coil);
+     	 lisy80_debug(debugbuf);
+     }
   lisyh_coil_set(  lisy_home_ss_special_coil_map[coil].mapped_to_coil, 1);
   delay (lisy_home_ss_special_coil_map[coil].pulsetime); // milliseconds delay from wiringpi library
   lisyh_coil_set(  lisy_home_ss_special_coil_map[coil].mapped_to_coil, 0);

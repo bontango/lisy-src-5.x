@@ -309,25 +309,26 @@ for (i=1; i<=64; i++)
 }
 
 
-/* lisyH_special_coil_pulse
+/* lisyH_special_coil_set
 	coil -> nr of coil
+	action -> 0-off, 1-on
 
-	this routine respect pulsetime and mapping
+	this routine respect mapping
 	from config file LisyH (Starship)
 */
-void lisyH_special_coil_pulse ( int coil )
+void lisyH_special_coil_set ( int coil, int action )
 {
 
  if ( lisy_home_ss_special_coil_map[coil].mapped_to_coil != 0)
  {
    if (  ls80dbg.bitv.coils )
    {
-   	 sprintf(debugbuf,"pulsed special solenoid: %d(org:%d)",lisy_home_ss_special_coil_map[coil].mapped_to_coil,coil);
+   	 sprintf(debugbuf,"set special solenoid: %d(org:%d) to %d",lisy_home_ss_special_coil_map[coil].mapped_to_coil,coil,action);
      	 lisy80_debug(debugbuf);
      }
-  lisyh_coil_set(  lisy_home_ss_special_coil_map[coil].mapped_to_coil, 1);
-  delay (lisy_home_ss_special_coil_map[coil].pulsetime); // milliseconds delay from wiringpi library
-  lisyh_coil_set(  lisy_home_ss_special_coil_map[coil].mapped_to_coil, 0);
+  lisyh_coil_set(  lisy_home_ss_special_coil_map[coil].mapped_to_coil, action);
+  //delay (lisy_home_ss_special_coil_map[coil].pulsetime); // milliseconds delay from wiringpi library
+  //lisyh_coil_set(  lisy_home_ss_special_coil_map[coil].mapped_to_coil, 0);
  }
 
 }

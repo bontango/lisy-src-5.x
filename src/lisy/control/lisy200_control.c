@@ -419,7 +419,7 @@ void do_ss_solenoid_set( char *buffer)
  solenoid = (10 * (buffer[1]-48)) + buffer[2]-48;
 
  //pulse the coil
- lisyH_special_coil_pulse( solenoid );
+ wheel_pulse( solenoid );
 
 }
 
@@ -2226,6 +2226,9 @@ int main(int argc, char *argv[])
     get_lamp2_descriptions();
     //read the descriptions for the coils
     get_coil_descriptions();
+
+    //init threads for wheels
+    wheels_init();
 
 
  // try say something about LISY80 if sound is requested

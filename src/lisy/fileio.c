@@ -1761,14 +1761,15 @@ else
      no = atoi(strtok(line, ";")); 	//coil number
      if ( no > 19 ) continue; //skip line if coil number is out of range
      lisy_home_ss_special_coil_map[no].pulsetime = atoi(strtok(NULL, ";")); 
+     lisy_home_ss_special_coil_map[no].delay = atoi(strtok(NULL, ";")); 
      lisy_home_ss_special_coil_map[no].mapped_to_coil = atoi(strtok(NULL, ";")); 
      //third field is comment
      strcpy( lisy_home_ss_special_coil_map[no].comment,strtok(NULL, ";"));
   //debug
   if ( ls80dbg.bitv.lamps | ls80dbg.bitv.coils )
   {
-    sprintf(debugbuf,"LISY HOME:  map special coil %d to number:%d (%s) pulsetime:%dms",
-		no,lisy_home_ss_special_coil_map[no].mapped_to_coil, lisy_home_ss_special_coil_map[no].comment ,lisy_home_ss_special_coil_map[no].pulsetime);
+    sprintf(debugbuf,"LISY HOME:  map special coil %d to number:%d (%s) pulsetime:%dms delay:%dms",
+		no,lisy_home_ss_special_coil_map[no].mapped_to_coil, lisy_home_ss_special_coil_map[no].comment ,lisy_home_ss_special_coil_map[no].pulsetime,lisy_home_ss_special_coil_map[no].delay);
     lisy80_debug(debugbuf);
   }
 

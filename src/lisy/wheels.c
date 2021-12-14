@@ -33,11 +33,15 @@
 //for Starship Switches
 extern unsigned char swMatrixLISY35[9];
 
+//from lisy35.c
+extern unsigned char lisy35_flipper_disable_status;
+
 //semaphores
 sem_t wheel_sem[2][5];
 
-//set the scoring wheel to value
-//6digit version only, ignoring digit 1
+//internal to wheels
+int oldpos[2][5];
+
 /*
 coil and switches
 5 - 41;Display 1;Pos0  100K;
@@ -177,14 +181,29 @@ void wheel_score_reset( void )
    //maximum 9 steps
    for(i=1; i<=10; i++)
    {
+     lisy35_switch_handler( 1 ); //update internal matrix to detect zero switch
      if ( CHECK_BIT(swMatrixLISY35[6],0)) wheel_pulse(5); else is_zero[0][0]=1;
+     lisy35_switch_handler( 1 ); //update internal matrix to detect zero switch
      if ( CHECK_BIT(swMatrixLISY35[6],1)) wheel_pulse(6); else is_zero[0][1]=1;
+     lisy35_switch_handler( 1 ); //update internal matrix to detect zero switch
      if ( CHECK_BIT(swMatrixLISY35[6],2)) wheel_pulse(7); else is_zero[0][2]=1;
+     lisy35_switch_handler( 1 ); //update internal matrix to detect zero switch
      if ( CHECK_BIT(swMatrixLISY35[6],3)) wheel_pulse(8); else is_zero[0][3]=1;
+     lisy35_switch_handler( 1 ); //update internal matrix to detect zero switch
      if ( CHECK_BIT(swMatrixLISY35[6],4)) wheel_pulse(9); else is_zero[0][4]=1;
      //extra delay if not all wheels are at zero
      if (is_zero[0][0]+is_zero[0][1]+is_zero[0][2]+is_zero[0][3]+is_zero[0][4] != 5) delay(300);
         }
+
+   //reset postion as well
+   for(i=0; i<5; i++) oldpos[0][i] = 0;
+   for(i=0; i<5; i++) oldpos[1][i] = 0;
+
+  if ( ls80dbg.bitv.coils )
+  {
+    sprintf(debugbuf,"Wheels: set wheels to zero");
+    lisy80_debug(debugbuf);
+  }
 }
 
 
@@ -210,7 +229,6 @@ void wheel_score( int display, char *data)
 {
    int i,k;
    int pos[2][5],pulses[2][5];
-   static int oldpos[2][5];
    static unsigned char first = 1;
 
    // -48 to get an int out of the ascii code ( 0..9)
@@ -226,8 +244,6 @@ void wheel_score( int display, char *data)
   	}
 	first = 0;
 	wheel_score_reset();
-	for(i=0; i<5; i++) oldpos[0][i] = 0;
-	for(i=0; i<5; i++) oldpos[1][i] = 0;
 	if ( ls80dbg.bitv.displays )
   	{
     	  sprintf(debugbuf,"Wheels: set to zero done");
@@ -258,4 +274,52 @@ void wheel_score( int display, char *data)
 	while ( pulses[0][3]-- >0 ) wheel_thread_pulse(8);
 	while ( pulses[0][4]-- >0 ) wheel_thread_pulse(9);
 }
-                                                   
+
+void wheels_show_int( int display, int digit, unsigned char dat)
+{
+
+   int i;
+   int pos[2][5],pulses;
+
+   //reset displays at first call
+   static unsigned char first = 1;
+
+   //ignore 'spaces' , display >1 and digit >6
+   if ( dat > 9 ) return;
+   if ( display > 2 ) return;
+   if ( digit > 6 ) return;
+   //ignore credit display for the moment
+   if ( display == 0 ) return;
+
+   if ( lisy35_flipper_disable_status == 0) //flipper enabled?
+     {
+	//adjust numbers
+	display--;
+	digit--;
+        //assign position
+	pos[display][digit] = dat;
+	//calculate pulses
+        pulses = oldpos[display][digit] - pos[display][digit];
+        if (  pulses > 0 )  pulses = abs( 10 -  pulses);
+        if (  pulses < 0 )  pulses = abs( pulses);
+        //store new value
+        oldpos[display][digit] = pos[display][digit];
+
+	//if ( ls80dbg.bitv.displays )
+        if ( 1 )
+  	{
+	  sprintf(debugbuf,"wheels: display:%d digit:%d dat:%d (%d pulses needed)\n",pulses,display,digit,dat);
+    	  lisy80_debug(debugbuf);
+  	}
+
+	switch(digit)
+	{
+	  case 2: while ( pulses-- >0 ) wheel_thread_pulse(5); break;
+	  case 3: while ( pulses-- >0 ) wheel_thread_pulse(6); break;
+	  case 4: while ( pulses-- >0 ) wheel_thread_pulse(7); break;
+	  case 5: while ( pulses-- >0 ) wheel_thread_pulse(8); break;
+	  case 6: while ( pulses-- >0 ) wheel_thread_pulse(9); break;
+	}
+
+    }
+}

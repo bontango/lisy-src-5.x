@@ -17,6 +17,7 @@
 #include "utils.h"
 #include "fadecandy.h"
 #include "lisy_home.h"
+#include "wheels.h"
 #include "externals.h"
 
 //globale var, used in most routines
@@ -355,6 +356,9 @@ void display35_show_int( int display, int digit, unsigned char dat)
 
   //write data to PIC
   lisy80_write_multibyte_disp_pic( buf, 2 );
+
+  //and to 'wheels' in case of Starship
+  if ( lisy_hardware_revision == 200 ) wheels_show_int( display, digit, dat );
 
 }
 

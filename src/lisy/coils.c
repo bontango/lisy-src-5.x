@@ -1083,7 +1083,8 @@ void lisyh_coil_select_led_driver_line(unsigned char line)
     lisy80_write_byte_coil_pic(  mydata_coil.byte );
 
     //debug?
-    if ((  ls80dbg.bitv.coils ) || (  ls80dbg.bitv.lamps ))
+    //if ((  ls80dbg.bitv.coils ) || (  ls80dbg.bitv.lamps ))
+    if (  ls80dbg.bitv.lamps )
     {
      sprintf(debugbuf,"LISY_home LED driver line %d selected",line);
      lisy80_debug(debugbuf);

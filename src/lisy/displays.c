@@ -605,6 +605,22 @@ void display_send_byte_torow( unsigned char data, int LD1_was_set, int LD2_was_s
 }
 
 //send one row (20 chars) to display, to rigth row
+//this version also adds buffer pointer ctrl to zero
+void display_send_row_torow_bp( char *buf, int LD1_was_set, int LD2_was_set )
+{
+
+  //buffer pointer to zero 0x01, 0xc0
+  display_send_byte_torow( 0x01, LD1_was_set, LD2_was_set );
+  display_send_byte_torow( 0xc0, LD1_was_set, LD2_was_set );
+
+  //call version without buffer pointer
+  display_send_row_torow( buf, LD1_was_set, LD2_was_set );
+
+
+}
+
+
+//send one row (20 chars) to display, to rigth row
 void display_send_row_torow( char *buf, int LD1_was_set, int LD2_was_set )
 {
 
@@ -726,7 +742,7 @@ else
 		{
 		  if ( memcmp( row1, oldrow1, 20*sizeof(char) ) != 0)
 			{
-			 display_send_row_torow( row1, 1, 0); //10 = first row
+			 display_send_row_torow_bp( row1, 1, 0); //10 = first row
 			 memcpy(oldrow1,row1,20*sizeof(char));
 		  	 //if (debug) fprintf(stderr,"[1][01234567890123456789]\n\r");
 			 if (debug) {  sprintf(debugbuf,"[row 1 changed][%s]\n\r",row1);
@@ -747,7 +763,7 @@ else
 		{
 		  if ( memcmp( row2, oldrow2, 20*sizeof(char) ) != 0)
 			{
-			 display_send_row_torow( row2, 0, 1); //01=second row
+			 display_send_row_torow_bp( row2, 0, 1); //01=second row
 			 memcpy(oldrow2,row2,20*sizeof(char));
 			 //if (debug) fprintf(stderr,"[2][01234567890123456789]\n\r");
 	 		 if (debug) { 
@@ -774,7 +790,7 @@ if (lisy80_game.is80B)
  {
         //line 1 
         sprintf(buf,"%02d %-17s",errornumber,msg80B);
-        display_send_row_torow( buf, 1, 0 );
+        display_send_row_torow_bp( buf, 1, 0 );
  }
  else
  {
@@ -861,14 +877,14 @@ void display_show_boot_message(char *s_lisy80_software_version,int lisy80_gtb_no
  {
 	//line 2
 	sprintf(buf,"BOOT LISY80 V %6s",s_lisy80_software_version);
-	display_send_row_torow( buf, 0, 1 );
+	display_send_row_torow_bp( buf, 0, 1 );
 	//line 1 make sure it is all uppercase
 	for (i=0; i<8; i++) lisy80_gamename[i] = toupper(lisy80_gamename[i]);
 	//line 1 countdown
 	for (i=5; i>=0; i--)
 	 { 
 		sprintf(buf,"%-8s GTB%03d   %02d",lisy80_gamename,lisy80_gtb_no,i);
-		display_send_row_torow( buf, 1, 0 );
+		display_send_row_torow_bp( buf, 1, 0 );
 		sleep(1);
 	  }
  }
@@ -905,7 +921,7 @@ if (lisy80_game.is80B)
 	char buf[22];
 	sprintf(buf,"SHUTDOWN INITIATED ");
 	//shutdown message on row 2
-	display_send_row_torow( buf, 0, 1 );
+	display_send_row_torow_bp( buf, 0, 1 );
  }
 else
  {

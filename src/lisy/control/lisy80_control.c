@@ -34,7 +34,7 @@
 
 //the version
 #define LISY80control_SOFTWARE_MAIN    0
-#define LISY80control_SOFTWARE_SUB     29
+#define LISY80control_SOFTWARE_SUB     30
 
 
 //fake definiton needed in lisy_w
@@ -373,11 +373,13 @@ void do_display_set( char *buffer)
   {
    case 1: 
 		sprintf(display_str,"%-20s",&buffer[4]);
-       		display_send_row_torow( display_str, 1, 0);
+       		display_send_row_torow_bp( display_str, 1, 0);
+	        strcpy(display_row1,display_str);
 		break;
    case 2: 
 		sprintf(display_str,"%-20s",&buffer[4]);
-       		display_send_row_torow( display_str, 0, 1);
+       		display_send_row_torow_bp( display_str, 0, 1);
+	        strcpy(display_row2,display_str);
 		break;
   }
 
@@ -1551,10 +1553,10 @@ int main(int argc, char *argv[])
       {
        //construct the message
        sprintf(buffer,"NO IP ASSIGNED      ");
-       display_send_row_torow( buffer, 1, 0);
+       display_send_row_torow_bp( buffer, 1, 0);
        fprintf(stderr,"%s\n",buffer);
        sprintf(buffer,"CHECK WLAN0 & ETH0  ");
-       display_send_row_torow( buffer, 0, 1);
+       display_send_row_torow_bp( buffer, 0, 1);
        fprintf(stderr,"%s\n",buffer);
        }//is 80B
        else
@@ -1574,14 +1576,14 @@ int main(int argc, char *argv[])
       {
        //construct the message
        sprintf(buffer,"IP %17s",inet_ntoa(myip->sin_addr));
-       display_send_row_torow( buffer, 1, 0);
+       display_send_row_torow_bp( buffer, 1, 0);
        //and store value for display routine
        strcpy(display_row1,buffer);
        fprintf(stderr,"%s\n",buffer);
        sprintf(buffer,"ON INTERFACE %7s",ip_interface);
        //and store value for display routine
        strcpy(display_row2,buffer);
-       display_send_row_torow( buffer, 0, 1);
+       display_send_row_torow_bp( buffer, 0, 1);
        fprintf(stderr,"%s\n",buffer);
        }//is 80B
        else

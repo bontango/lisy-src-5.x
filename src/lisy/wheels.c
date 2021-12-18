@@ -165,6 +165,7 @@ void wheel_pulse ( int coil )
   lisyh_coil_set(  lisy_home_ss_special_coil_map[coil].mapped_to_coil, 1);
   delay (lisy_home_ss_special_coil_map[coil].pulsetime); // milliseconds delay from wiringpi library
   lisyh_coil_set(  lisy_home_ss_special_coil_map[coil].mapped_to_coil, 0);
+  //delay (lisy_home_ss_special_coil_map[coil].delay); // milliseconds delay from wiringpi library
  }
 
 }
@@ -181,15 +182,15 @@ void wheel_score_reset( void )
    //maximum 9 steps
    for(i=1; i<=10; i++)
    {
-     lisy35_switch_handler( 1 ); //update internal matrix to detect zero switch
+     lisy35_switchmatrix_update(); //update internal matrix to detect zero switch
      if ( CHECK_BIT(swMatrixLISY35[6],0)) wheel_pulse(5); else is_zero[0][0]=1;
-     lisy35_switch_handler( 1 ); //update internal matrix to detect zero switch
+     lisy35_switchmatrix_update(); //update internal matrix to detect zero switch
      if ( CHECK_BIT(swMatrixLISY35[6],1)) wheel_pulse(6); else is_zero[0][1]=1;
-     lisy35_switch_handler( 1 ); //update internal matrix to detect zero switch
+     lisy35_switchmatrix_update(); //update internal matrix to detect zero switch
      if ( CHECK_BIT(swMatrixLISY35[6],2)) wheel_pulse(7); else is_zero[0][2]=1;
-     lisy35_switch_handler( 1 ); //update internal matrix to detect zero switch
+     lisy35_switchmatrix_update(); //update internal matrix to detect zero switch
      if ( CHECK_BIT(swMatrixLISY35[6],3)) wheel_pulse(8); else is_zero[0][3]=1;
-     lisy35_switch_handler( 1 ); //update internal matrix to detect zero switch
+     lisy35_switchmatrix_update(); //update internal matrix to detect zero switch
      if ( CHECK_BIT(swMatrixLISY35[6],4)) wheel_pulse(9); else is_zero[0][4]=1;
      //extra delay if not all wheels are at zero
      if (is_zero[0][0]+is_zero[0][1]+is_zero[0][2]+is_zero[0][3]+is_zero[0][4] != 5) delay(300);

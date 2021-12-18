@@ -308,17 +308,17 @@ void wheels_show_int( int display, int digit, unsigned char dat)
 	//if ( ls80dbg.bitv.displays )
         if ( 1 )
   	{
-	  sprintf(debugbuf,"wheels: display:%d digit:%d dat:%d (%d pulses needed)\n",pulses,display,digit,dat);
+	  sprintf(debugbuf,"wheels: display:%d digit:%d dat:%d (%d pulses needed)\n",display,digit,dat,pulses);
     	  lisy80_debug(debugbuf);
   	}
 
 	switch(digit)
 	{
-	  case 2: while ( pulses-- >0 ) wheel_thread_pulse(5); break;
-	  case 3: while ( pulses-- >0 ) wheel_thread_pulse(6); break;
-	  case 4: while ( pulses-- >0 ) wheel_thread_pulse(7); break;
-	  case 5: while ( pulses-- >0 ) wheel_thread_pulse(8); break;
-	  case 6: while ( pulses-- >0 ) wheel_thread_pulse(9); break;
+	  case 1: while ( pulses-- >0 ) wheel_thread_pulse(5); break;
+	  case 2: while ( pulses-- >0 ) wheel_thread_pulse(6); break;
+	  case 3: while ( pulses-- >0 ) wheel_thread_pulse(7); break;
+	  case 4: while ( pulses-- >0 ) wheel_thread_pulse(8); break;
+	  case 5: while ( pulses-- >0 ) wheel_thread_pulse(9); break;
 	}
 
     }

@@ -437,7 +437,7 @@ void wheels_show_int( int display, int digit, unsigned char dat)
     	  lisy80_debug(debugbuf);
   	}
 
-     if(display==1)
+     if(display==0)
      {
 	switch(digit)
 	{
@@ -448,7 +448,7 @@ void wheels_show_int( int display, int digit, unsigned char dat)
 	  case 5: while ( pulses-- >0 ) wheel_thread_pulse(9); break;
 	}
      }
-     if(display==2)
+     if(display==1)
      {
         switch(digit)
         {

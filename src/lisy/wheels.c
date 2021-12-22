@@ -129,6 +129,81 @@ static void* wheel_thread4 (void *arg)
  }
  return(arg);
 }
+//player2 digit1
+static void* wheel_thread5 (void *arg)
+{
+ while(1) //endless loop
+ {
+  //wait for semaphor
+  sem_wait(&wheel_sem[1][0]);
+  //puls the wheel and wait afterwards
+  lisyH_special_coil_set( 12, 1);
+  delay(lisy_home_ss_special_coil_map[12].pulsetime);
+  lisyH_special_coil_set( 12, 0);
+  delay(lisy_home_ss_special_coil_map[12].delay);
+ }
+ return(arg);
+}
+//player2 digit2
+static void* wheel_thread6 (void *arg)
+{
+ while(1) //endless loop
+ {
+  //wait for semaphor
+  sem_wait(&wheel_sem[1][1]);
+  //puls the wheel and wait afterwards
+  lisyH_special_coil_set( 13, 1);
+  delay(lisy_home_ss_special_coil_map[13].pulsetime);
+  lisyH_special_coil_set( 13, 0);
+  delay(lisy_home_ss_special_coil_map[13].delay);
+ }
+ return(arg);
+}
+//player2 digit3
+static void* wheel_thread7 (void *arg)
+{
+ while(1) //endless loop
+ {
+  //wait for semaphor
+  sem_wait(&wheel_sem[1][2]);
+  //puls the wheel and wait afterwards
+  lisyH_special_coil_set( 14, 1);
+  delay(lisy_home_ss_special_coil_map[14].pulsetime);
+  lisyH_special_coil_set( 14, 0);
+  delay(lisy_home_ss_special_coil_map[14].delay);
+ }
+ return(arg);
+}
+//player2 digit4
+static void* wheel_thread8 (void *arg)
+{
+ while(1) //endless loop
+ {
+  //wait for semaphor
+  sem_wait(&wheel_sem[1][3]);
+  //puls the wheel and wait afterwards
+  lisyH_special_coil_set( 15, 1);
+  delay(lisy_home_ss_special_coil_map[15].pulsetime);
+  lisyH_special_coil_set( 15, 0);
+  delay(lisy_home_ss_special_coil_map[15].delay);
+ }
+ return(arg);
+}
+//player2 digit5
+static void* wheel_thread9 (void *arg)
+{
+ while(1) //endless loop
+ {
+  //wait for semaphor
+  sem_wait(&wheel_sem[1][4]);
+  //puls the wheel and wait afterwards
+  lisyH_special_coil_set( 16, 1);
+  delay(lisy_home_ss_special_coil_map[16].pulsetime);
+  lisyH_special_coil_set( 16, 0);
+  delay(lisy_home_ss_special_coil_map[16].delay);
+ }
+ return(arg);
+}
 
 //create the threads for the wheel pulsing
 void wheels_init( void )
@@ -144,11 +219,21 @@ void wheels_init( void )
  pthread_create (&th[2], NULL, wheel_thread2, NULL);
  pthread_create (&th[3], NULL, wheel_thread3, NULL);
  pthread_create (&th[4], NULL, wheel_thread4, NULL);
+ pthread_create (&th[5], NULL, wheel_thread5, NULL);
+ pthread_create (&th[6], NULL, wheel_thread6, NULL);
+ pthread_create (&th[7], NULL, wheel_thread7, NULL);
+ pthread_create (&th[8], NULL, wheel_thread8, NULL);
+ pthread_create (&th[9], NULL, wheel_thread9, NULL);
  pthread_detach (th[0]);
  pthread_detach (th[1]);
  pthread_detach (th[2]);
  pthread_detach (th[3]);
  pthread_detach (th[4]);
+ pthread_detach (th[5]);
+ pthread_detach (th[6]);
+ pthread_detach (th[7]);
+ pthread_detach (th[8]);
+ pthread_detach (th[9]);
 
 }
 
@@ -175,13 +260,14 @@ void wheel_pulse ( int coil )
 void wheel_score_reset( void )
 {
 
-   int i;
+   int i, check_for_all_zero;
    int is_zero[2][5] =  {{0,0,0,0,0},{0,0,0,0,0}};
 
    //set 5 digits
    //maximum 9 steps
    for(i=1; i<=10; i++)
    {
+     //display1
      lisy35_switchmatrix_update(); //update internal matrix to detect zero switch
      if ( CHECK_BIT(swMatrixLISY35[6],0)) wheel_pulse(5); else is_zero[0][0]=1;
      lisy35_switchmatrix_update(); //update internal matrix to detect zero switch
@@ -192,8 +278,24 @@ void wheel_score_reset( void )
      if ( CHECK_BIT(swMatrixLISY35[6],3)) wheel_pulse(8); else is_zero[0][3]=1;
      lisy35_switchmatrix_update(); //update internal matrix to detect zero switch
      if ( CHECK_BIT(swMatrixLISY35[6],4)) wheel_pulse(9); else is_zero[0][4]=1;
+     //display2
+     lisy35_switchmatrix_update(); //update internal matrix to detect zero switch
+     if ( CHECK_BIT(swMatrixLISY35[8],0)) wheel_pulse(12); else is_zero[1][0]=1;
+     lisy35_switchmatrix_update(); //update internal matrix to detect zero switch
+     if ( CHECK_BIT(swMatrixLISY35[8],1)) wheel_pulse(13); else is_zero[1][1]=1;
+     lisy35_switchmatrix_update(); //update internal matrix to detect zero switch
+     if ( CHECK_BIT(swMatrixLISY35[8],2)) wheel_pulse(14); else is_zero[1][2]=1;
+     lisy35_switchmatrix_update(); //update internal matrix to detect zero switch
+     if ( CHECK_BIT(swMatrixLISY35[8],3)) wheel_pulse(15); else is_zero[1][3]=1;
+     lisy35_switchmatrix_update(); //update internal matrix to detect zero switch
+     if ( CHECK_BIT(swMatrixLISY35[8],4)) wheel_pulse(16); else is_zero[1][4]=1;
+
+
+
      //extra delay if not all wheels are at zero
-     if (is_zero[0][0]+is_zero[0][1]+is_zero[0][2]+is_zero[0][3]+is_zero[0][4] != 5) delay(300);
+     check_for_all_zero = is_zero[0][0]+is_zero[0][1]+is_zero[0][2]+is_zero[0][3]+is_zero[0][4];
+     check_for_all_zero = check_for_all_zero+is_zero[1][0]+is_zero[1][1]+is_zero[1][2]+is_zero[1][3]+is_zero[1][4];
+     if (check_for_all_zero != 10) delay(300);
         }
 
    //reset postion as well
@@ -214,18 +316,25 @@ void wheel_thread_pulse( int wheel)
 
   switch(wheel)
   {
+	//display1
    case 5: sem_post(&wheel_sem[0][0]); break;
    case 6: sem_post(&wheel_sem[0][1]); break;
    case 7: sem_post(&wheel_sem[0][2]); break;
    case 8: sem_post(&wheel_sem[0][3]); break;
    case 9: sem_post(&wheel_sem[0][4]); break;
+	//display2
+   case 12: sem_post(&wheel_sem[1][0]); break;
+   case 13: sem_post(&wheel_sem[1][1]); break;
+   case 14: sem_post(&wheel_sem[1][2]); break;
+   case 15: sem_post(&wheel_sem[1][3]); break;
+   case 16: sem_post(&wheel_sem[1][4]); break;
 
   }
 
 
 }
 
-
+//called from lisy200_control only
 void wheel_score( int display, char *data)
 {
    int i,k;
@@ -268,12 +377,27 @@ void wheel_score( int display, char *data)
 	   //store new value
 	   oldpos[0][i] = pos[0][i];
 	 }
+	for(i=0; i<5; i++) 
+	 { 
+	   pulses[1][i] = oldpos[1][i] - pos[1][i];
+	   if (  pulses[1][i] > 0 )  pulses[1][i] = abs( 10 -  pulses[1][i]);
+	   if (  pulses[1][i] < 0 )  pulses[1][i] = abs( pulses[1][i]);
+	   //store new value
+	   oldpos[1][i] = pos[1][i];
+	 }
 
+	//display2
 	while ( pulses[0][0]-- >0 ) wheel_thread_pulse(5);
 	while ( pulses[0][1]-- >0 ) wheel_thread_pulse(6);
 	while ( pulses[0][2]-- >0 ) wheel_thread_pulse(7);
 	while ( pulses[0][3]-- >0 ) wheel_thread_pulse(8);
 	while ( pulses[0][4]-- >0 ) wheel_thread_pulse(9);
+	//display2
+	while ( pulses[1][0]-- >0 ) wheel_thread_pulse(12);
+	while ( pulses[1][1]-- >0 ) wheel_thread_pulse(13);
+	while ( pulses[1][2]-- >0 ) wheel_thread_pulse(14);
+	while ( pulses[1][3]-- >0 ) wheel_thread_pulse(15);
+	while ( pulses[1][4]-- >0 ) wheel_thread_pulse(16);
 }
 
 void wheels_show_int( int display, int digit, unsigned char dat)
@@ -313,6 +437,8 @@ void wheels_show_int( int display, int digit, unsigned char dat)
     	  lisy80_debug(debugbuf);
   	}
 
+     if(display==1)
+     {
 	switch(digit)
 	{
 	  case 1: while ( pulses-- >0 ) wheel_thread_pulse(5); break;
@@ -321,6 +447,18 @@ void wheels_show_int( int display, int digit, unsigned char dat)
 	  case 4: while ( pulses-- >0 ) wheel_thread_pulse(8); break;
 	  case 5: while ( pulses-- >0 ) wheel_thread_pulse(9); break;
 	}
+     }
+     if(display==2)
+     {
+        switch(digit)
+        {
+          case 1: while ( pulses-- >0 ) wheel_thread_pulse(12); break;
+          case 2: while ( pulses-- >0 ) wheel_thread_pulse(13); break;
+          case 3: while ( pulses-- >0 ) wheel_thread_pulse(14); break;
+          case 4: while ( pulses-- >0 ) wheel_thread_pulse(15); break;
+          case 5: while ( pulses-- >0 ) wheel_thread_pulse(16); break;
+        }
+     }
 
-    }
+    }//flipper enabled?
 }

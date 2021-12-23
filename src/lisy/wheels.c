@@ -36,11 +36,12 @@ extern unsigned char swMatrixLISY35[9];
 //from lisy35.c
 extern unsigned char lisy35_flipper_disable_status;
 
+//internal to wheels
+int oldpos[2][5];
+
 //semaphores
 sem_t wheel_sem[2][5];
 
-//internal to wheels
-int oldpos[2][5];
 
 /*
 coil and switches
@@ -406,9 +407,6 @@ void wheels_show_int( int display, int digit, unsigned char dat)
    int i;
    int pos[2][5],pulses;
 
-   //reset displays at first call
-   static unsigned char first = 1;
-
    //ignore 'spaces' , display >1 and digit >6
    if ( dat > 9 ) return;
    if ( display > 2 ) return;
@@ -420,6 +418,7 @@ void wheels_show_int( int display, int digit, unsigned char dat)
      {
 	//adjust numbers
 	display--;
+	digit--; //digit = digit -2
 	digit--;
         //assign position
 	pos[display][digit] = dat;
@@ -427,36 +426,37 @@ void wheels_show_int( int display, int digit, unsigned char dat)
         pulses = oldpos[display][digit] - pos[display][digit];
         if (  pulses > 0 )  pulses = abs( 10 -  pulses);
         if (  pulses < 0 )  pulses = abs( pulses);
-        //store new value
-        oldpos[display][digit] = pos[display][digit];
 
 	//if ( ls80dbg.bitv.displays )
         if ( 1 )
   	{
-	  sprintf(debugbuf,"wheels: display:%d digit:%d dat:%d (%d pulses needed)\n",display,digit,dat,pulses);
+	  sprintf(debugbuf,"wheels: display:%d digit:%d dat:%d (old dat%d   %d pulses needed)\n",display,digit,dat, oldpos[display][digit],pulses);
     	  lisy80_debug(debugbuf);
   	}
+
+        //store new value
+        oldpos[display][digit] = pos[display][digit];
 
      if(display==0)
      {
 	switch(digit)
 	{
-	  case 1: while ( pulses-- >0 ) wheel_thread_pulse(5); break;
-	  case 2: while ( pulses-- >0 ) wheel_thread_pulse(6); break;
-	  case 3: while ( pulses-- >0 ) wheel_thread_pulse(7); break;
-	  case 4: while ( pulses-- >0 ) wheel_thread_pulse(8); break;
-	  case 5: while ( pulses-- >0 ) wheel_thread_pulse(9); break;
+	  case 0: while ( pulses-- >0 ) wheel_thread_pulse(5); break;
+	  case 1: while ( pulses-- >0 ) wheel_thread_pulse(6); break;
+	  case 2: while ( pulses-- >0 ) wheel_thread_pulse(7); break;
+	  case 3: while ( pulses-- >0 ) wheel_thread_pulse(8); break;
+	  case 4: while ( pulses-- >0 ) wheel_thread_pulse(9); break;
 	}
      }
      if(display==1)
      {
         switch(digit)
         {
-          case 1: while ( pulses-- >0 ) wheel_thread_pulse(12); break;
-          case 2: while ( pulses-- >0 ) wheel_thread_pulse(13); break;
-          case 3: while ( pulses-- >0 ) wheel_thread_pulse(14); break;
-          case 4: while ( pulses-- >0 ) wheel_thread_pulse(15); break;
-          case 5: while ( pulses-- >0 ) wheel_thread_pulse(16); break;
+          case 0: while ( pulses-- >0 ) wheel_thread_pulse(12); break;
+          case 1: while ( pulses-- >0 ) wheel_thread_pulse(13); break;
+          case 2: while ( pulses-- >0 ) wheel_thread_pulse(14); break;
+          case 3: while ( pulses-- >0 ) wheel_thread_pulse(15); break;
+          case 4: while ( pulses-- >0 ) wheel_thread_pulse(16); break;
         }
      }
 

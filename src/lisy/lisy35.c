@@ -45,7 +45,7 @@ t_stru_lisy35_sounds_csv lisy35_sound_stru[256];
 //internal switch Matrix for system1, we need 7 elements
 //as pinmame internal starts with 1
 //swMatrix 6 for SLAM and other special switches
-unsigned char swMatrixLISY35[8] = { 0,0,0,0,0,0,0,0 };
+unsigned char swMatrixLISY35[9] = { 0,0,0,0,0,0,0,0,0 };
 
 //for special cases, where pins are doings strobes
 //we need to be aware and filter out

@@ -35,7 +35,7 @@
 
 #define S11_IRQFREQ     1000
 /*-- Smoothing values --*/
-#ifdef PROC_SUPPORT
+#if defined(PROC_SUPPORT) || defined(LISY_SUPPORT)
 // TODO/PROC: Make variables out of these defines. Values depend on "-proc" switch.
 #define S11_SOLSMOOTH      1 /* Don't smooth values on real hardware */
 #define S11_LAMPSMOOTH     1
@@ -208,7 +208,7 @@ static INTERRUPT_GEN(s11_vblank) {
   }
 #endif
   locals.solsmooth[locals.vblankCount % S11_SOLSMOOTH] = locals.solenoids;
-#ifndef PROC_SUPPORT 
+#if !defined(PROC_SUPPORT) && !defined(LISY_SUPPORT)
  #if S11_SOLSMOOTH != 2
  #  error "Need to update smooth formula"
  #endif

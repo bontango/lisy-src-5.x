@@ -1313,6 +1313,14 @@ static uint8_t ss_want_to_change = 0; //1== action 0; 2==action 2
 static uint8_t current_ac_state = 0;
 static uint8_t current_ss_state = 0;
 
+
+//from s11.c PROC: ignore 'FF00' call at game start as we get 'a lot of clunks'
+if ( coreGlobals.solenoids ==  0xff00 )
+{
+  if ( ls80dbg.bitv.coils ) lisy80_debug("LISY_W_SOLENOID_HANDLER: FF00 call: ignored!");
+  return;
+}
+
 //did something changed?
 if ( mysol != coreGlobals.solenoids)
 {

@@ -510,6 +510,9 @@ static WRITE_HANDLER(pia0b_w) {
   }
   if (data != locals.solBits2) {
     locals.solBits2 = data;
+#if defined(LISY_SUPPORT)
+    lisy_w_direct_solenoid_handler(data);
+#endif
     updsol();
   }
 }

@@ -202,6 +202,7 @@ else if (strcmp(lisymini_game.type,"SYS11B") == 0) lisymini_game.typeno = LISYW_
 else if (strcmp(lisymini_game.type,"SYS11B_") == 0)  { lisymini_game.typeno = LISYW_TYPE_SYS11B; lisy_AC_Relais_no = 14;}
 else if (strcmp(lisymini_game.type,"SYS11C") == 0) lisymini_game.typeno = LISYW_TYPE_SYS11C;
 else if (strcmp(lisymini_game.type,"SYS11C_") == 0)  { lisymini_game.typeno = LISYW_TYPE_SYS11C; lisy_AC_Relais_no = 14;}
+else if (strcmp(lisymini_game.type,"SYS11RG") == 0) lisymini_game.typeno = LISYW_TYPE_SYS11RG;
 else lisymini_game.typeno = LISYW_TYPE_NONE;
 
 //set internal flags based on system type
@@ -224,6 +225,7 @@ switch(lisymini_game.typeno)
 	case LISYW_TYPE_SYS11A: 
 	case LISYW_TYPE_SYS11B: 
 	case LISYW_TYPE_SYS11C: 
+	case LISYW_TYPE_SYS11RG: 
 		lisy_has_AC_Relais = 1;	
 		break;
 	default : 
@@ -1073,6 +1075,7 @@ void lisy_w_display_handler(void)
 	lisy_w_display_handler_SYS11A();
        break;
   case LISYW_TYPE_SYS11C: 
+  case LISYW_TYPE_SYS11RG: 
 	lisy_w_display_handler_SYS11C();
        break;
   default:
@@ -1117,6 +1120,7 @@ if (first)
         case LISYW_TYPE_SYS11A:
         case LISYW_TYPE_SYS11B:
         case LISYW_TYPE_SYS11C:
+  	case LISYW_TYPE_SYS11RG: 
  		core_setSw( S11_SWADVANCE, lisy_api_get_switch_status(72) );
  		core_setSw( S11_SWUPDN, lisy_api_get_switch_status(73) );
                 break;
@@ -1191,6 +1195,7 @@ if ( ret == 72) {
         case LISYW_TYPE_SYS11A:
         case LISYW_TYPE_SYS11B:
         case LISYW_TYPE_SYS11C:
+  	case LISYW_TYPE_SYS11RG: 
           core_setSw( S11_SWADVANCE, action );
           if ( ls80dbg.bitv.switches )
           {
@@ -1223,6 +1228,7 @@ if ( ret == 73) {
         case LISYW_TYPE_SYS11A:
         case LISYW_TYPE_SYS11B:
         case LISYW_TYPE_SYS11C:
+  	case LISYW_TYPE_SYS11RG: 
           core_setSw( S11_SWUPDN, action );
           if ( ls80dbg.bitv.switches )
           {
@@ -1296,6 +1302,62 @@ if (ls80opt.bitv.freeplay == 1) //only if freeplay option is set
   return;
 }
 
+//direct solenoid handler based on PIA ports
+//sol14 & 15 for Riverboat gambler only at the moment
+//we may use it for other pins too in the future
+void lisy_w_direct_solenoid_handler( unsigned char data )
+{
+
+ static unsigned char sol_14 = 0;
+ static unsigned char sol_15 = 0;
+ unsigned char new_sol_14, new_sol_15,action;
+
+ //from s11.c PROC: ignore 'FF00' call at game start as we get 'a lot of clunks'
+ if ( data ==  0xff )
+ {
+  if ( ls80dbg.bitv.coils ) lisy80_debug("LISY_W_DIRECT_SOLENOID_HANDLER: FF call: ignored!");
+  return;
+ }
+
+
+ //special case Riverboat Gambler 'wheel' via Sol14 & 15
+ if ( lisymini_game.typeno == LISYW_TYPE_SYS11RG ) 
+ {
+ new_sol_14 = data & 32;
+ new_sol_15 = data & 64;
+
+ if ( new_sol_14 != sol_14)
+ {
+	if (new_sol_14 > 0) action = 1; else action = 0;
+        sol_14 = new_sol_14;
+	lisy_api_sol_ctrl( 14, action );
+
+        if ( ls80dbg.bitv.coils )
+	{
+           sprintf(debugbuf,"LISY_W_DIRECT_SOLENOID_HANDLER: Solenoid:14, changed to %d )", action ); 
+           lisy80_debug(debugbuf);
+ 	}
+ } //if sol14 changed
+
+ if ( new_sol_15 != sol_15)
+ {
+
+	if (new_sol_15 > 0) action = 1; else action = 0;
+        sol_15 = new_sol_15;
+        lisy_api_sol_ctrl( 15,action);
+
+        if ( ls80dbg.bitv.coils )
+        {
+           sprintf(debugbuf,"LISY_W_DIRECT_SOLENOID_HANDLER: Solenoid:15, changed to %d )", action);
+           lisy80_debug(debugbuf);
+        }
+ } //if sol14 changed
+
+ } //if Riverboat gambler
+
+}
+
+
 //solenoid handler
 void lisy_w_solenoid_handler( void )
 {
@@ -1321,6 +1383,10 @@ if ( coreGlobals.solenoids ==  0xff00 )
   return;
 }
 
+
+
+
+
 //did something changed?
 if ( mysol != coreGlobals.solenoids)
 {
@@ -1343,6 +1409,14 @@ if ( mysol != coreGlobals.solenoids)
                   sprintf(debugbuf,"LISY_W_SOLENOID_HANDLER: hardware Rule set for Solenoid %d, action %d ignored",sol_no,action);
                   lisy80_debug(debugbuf);
 	        }
+   	   continue;
+	}
+
+	//special case riverboard gambler, ignor sol14 & sol15 in this case ( wheel )
+	//as it is handled directly above
+	//special case Riverboat Gambler 'wheel' via Sol14 & 15
+	if ( ( lisymini_game.typeno == LISYW_TYPE_SYS11RG ) && (( sol_no == 14 ) || (sol_no == 15)) )
+	{
    	   continue;
 	}
 

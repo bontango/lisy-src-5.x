@@ -7,6 +7,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_mixer.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -18,6 +19,7 @@
 #include <arpa/inet.h>
 #include <wiringPi.h>
 #include <pthread.h>
+#include "lisy200_control.h"
 #include "../lisy35.h"
 #include "../lisy_home.h"
 #include "../fileio.h"

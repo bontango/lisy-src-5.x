@@ -336,59 +336,82 @@ int lisy35_get_gamename(char *gamename)
 }
 
 
-//help function
-//we may later delete this
-char my_datchar2( int dat)
+//help functions
+//for bcd value PIC
+int my_seg2bcd( UINT16 seg )
 {
-char datchar;
+ int bcd;
 
-switch (dat) {
-      case 0: datchar = '0'; break;
-      case 1: datchar = '1'; break;
-      case 2: datchar = '2'; break;
-      case 3: datchar = '3'; break;
-      case 4: datchar = '4'; break;
-      case 5: datchar = '5'; break;
-      case 6: datchar = '6'; break;
-      case 7: datchar = '7'; break;
-      case 8: datchar = '8'; break;
-      case 9: datchar = '9'; break;
-      case 10: datchar = ' '; break;
-      case 15: datchar = ' '; break;
-      default: datchar = '-'; break;
+   switch (seg) {
+      case 0x3f: bcd = 0; break;
+      case 0x06: bcd = 1; break;
+      case 0x5b: bcd = 2; break;
+      case 0x4f: bcd = 3; break;
+      case 0x66: bcd = 4; break;
+      case 0x6d: bcd = 5; break;
+      case 0x7d: bcd = 6; break;
+      case 0x07: bcd = 7; break;
+      case 0x7f: bcd = 8; break;
+      case 0x6f: bcd = 9; break;
+      default: bcd = 15; break; //space
+	}
+ return bcd;
+}
+
+
+//for debug
+char by_seg2char( UINT16 seg )
+{
+ char mychar;
+
+   switch (seg) {
+      case 0x3f: mychar = '0'; break;
+      case 0x06: mychar = '1'; break;
+      case 0x5b: mychar = '2'; break;
+      case 0x4f: mychar = '3'; break;
+      case 0x66: mychar = '4'; break;
+      case 0x6d: mychar = '5'; break;
+      case 0x7d: mychar = '6'; break;
+      case 0x07: mychar = '7'; break;
+      case 0x7f: mychar = '8'; break;
+      case 0x6f: mychar = '9'; break;
+      default: mychar = ' '; break; //space
         }
-
-return datchar;
+ return mychar;
 }
 
 
 //display handler
-void lisy35_display_handler( int index, int value )
+//we use segment value now
+void lisy35_display_handler( int index, UINT16 seg )
 {
 
-static int myvalue[56]
-= { 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
-    80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
-    80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
-    80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
-    80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
-    80, 80, 80, 80, 80, 80 };
+static UINT16 myseg[56]
+= { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+    0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
 
-int i;
+int i,value;
 int has_changed = 0;
 
 
 if ( index > 55 )
   {
-    fprintf(stderr,"LISY35_DISP_HANDLER: index out of range index:%d  value:%d\n",index,value);
+    fprintf(stderr,"LISY35_DISP_HANDLER: index out of range index:%d  seg:%x\n",index,seg);
     return;
   }
 
-if ( value != myvalue[index] )
+if ( seg != myseg[index] )
   {
     has_changed = 1; //for possible debugging only
     //remember
-    myvalue[index] = value;
+    myseg[index] = seg;
+    //calc bcd value
+    value = my_seg2bcd(seg);
+
 switch(index) //reverse order is handled by switch PIC
    {
      case 1 ... 7: //Bally player 1
@@ -425,25 +448,25 @@ if ( ls80dbg.bitv.displays )
     printf("----- Index %d changed to %d -----\n",index,value);
 
     printf("Player1:>");
-    for (i=1; i<=7; i++) printf("%c",my_datchar2(myvalue[i]));
+    for (i=1; i<=7; i++) printf("%c",by_seg2char(myseg[i]));
     printf("<\n");
     printf("Player2:>");
-    for (i=9; i<=15; i++) printf("%c",my_datchar2(myvalue[i]));
+    for (i=9; i<=15; i++) printf("%c",by_seg2char(myseg[i]));
     printf("<\n");
     printf("Player3:>");
-    for (i=17; i<=23; i++) printf("%c",my_datchar2(myvalue[i]));
+    for (i=17; i<=23; i++) printf("%c",by_seg2char(myseg[i]));
     printf("<\n");
     printf("Player4:>");
-    for (i=25; i<=31; i++) printf("%c",my_datchar2(myvalue[i]));
+    for (i=25; i<=31; i++) printf("%c",by_seg2char(myseg[i]));
     printf("<\n");
     printf(" Status:>");
-    for (i=33; i<=39; i++) printf("%c",my_datchar2(myvalue[i]));
+    for (i=33; i<=39; i++) printf("%c",by_seg2char(myseg[i]));
     printf("<\n");
     printf("Player5:>");
-    for (i=41; i<=47; i++) printf("%c",my_datchar2(myvalue[i]));
+    for (i=41; i<=47; i++) printf("%c",by_seg2char(myseg[i]));
     printf("<\n");
     printf("Player6:>");
-    for (i=49; i<=55; i++) printf("%c",my_datchar2(myvalue[i]));
+    for (i=49; i<=55; i++) printf("%c",by_seg2char(myseg[i]));
     printf("<\n");
   }
  }//if display debug

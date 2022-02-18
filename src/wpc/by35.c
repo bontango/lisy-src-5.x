@@ -107,10 +107,10 @@ static void by35_dispStrobe(int mask) {
       for (jj = 0; dispMask; jj++, dispMask>>=1)
         if (dispMask & 0x01)
         {
-#ifdef LISY_SUPPORT
-          lisy35_display_handler( jj*8+ii, locals.bcd[jj] & 0x0f );
-#endif
           locals.segments[jj*8+ii].w |= locals.pseg[jj*8+ii].w = locals.bcd2seg[locals.bcd[jj] & 0x0f];
+#ifdef LISY_SUPPORT
+          lisy35_display_handler( jj*8+ii, locals.segments[jj*8+ii].w);
+#endif
         }
     }
 

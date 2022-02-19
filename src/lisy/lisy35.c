@@ -52,6 +52,10 @@ unsigned char swMatrixLISY35[9] = { 0,0,0,0,0,0,0,0,0 };
 unsigned char lisy35_J4PIN5_is_strobe = 0;
 unsigned char lisy35_J4PIN8_is_strobe = 0;
 
+//Okaegi mod ?
+unsigned char lisy35_okaegi_mod = 0;
+
+
 //from coils.c
 extern unsigned char lisy35_bally_hw_check_finished;
 
@@ -910,6 +914,21 @@ void lisy35_set_variant(void)
   lisy35_display_set_variant(0); // * 0 default: 4 player display plus 1 status (6-digit)
   lisy35_J4PIN5_is_strobe = 0;
   lisy35_J4PIN8_is_strobe = 0;
+  lisy35_display_set_variant(30); //Okaegi mod default off
+
+  //inform display PIC (at least v406 needed) about different controlling
+  //in case Okaegi 6to7digit conversion is used
+  //we have added '10' to special cfg in csv in this case
+  if ( lisy35_game.special_cfg > 9) 
+  {
+   if ( ls80dbg.bitv.basic )
+  	{
+    	sprintf(debugbuf,"Info: LISY35 Oaegi mod activated (cfg is %d)" ,lisy35_game.special_cfg);
+    	lisy80_debug(debugbuf);
+    	}
+   lisy35_okaegi_mod = 1;
+   lisy35_game.special_cfg = lisy35_game.special_cfg -10;
+  }
 
   switch(lisy35_game.special_cfg)
   {
@@ -992,6 +1011,10 @@ void lisy35_set_variant(void)
 	  break;
   }
 
+  //Okaegi mod?
+  //this is handled like 7digit in pinmame
+  //but we need to inform display PIC about different handling
+  if ( lisy35_okaegi_mod == 1 ) lisy35_display_set_variant(31); 
 
   //set the right AUX Lampdriverboard variant
   lisy35_coil_set_lampdriver_variant(lisy35_game.aux_lamp_variant);

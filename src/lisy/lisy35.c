@@ -923,7 +923,7 @@ void lisy35_set_variant(void)
   {
    if ( ls80dbg.bitv.basic )
   	{
-    	sprintf(debugbuf,"Info: LISY35 Oaegi mod activated (cfg is %d)" ,lisy35_game.special_cfg);
+    	sprintf(debugbuf,"Info: LISY35 Okaegi mod activated (cfg is %d)" ,lisy35_game.special_cfg);
     	lisy80_debug(debugbuf);
     	}
    lisy35_okaegi_mod = 1;

@@ -1339,6 +1339,9 @@ void lisy_w_direct_solenoid_handler( unsigned char data )
  	}
  } //if sol14 changed
 
+/*
+ RTH- Test with sol14 only, sol15 will be handled by APC
+
  if ( new_sol_15 != sol_15)
  {
 
@@ -1351,8 +1354,8 @@ void lisy_w_direct_solenoid_handler( unsigned char data )
            sprintf(debugbuf,"LISY_W_DIRECT_SOLENOID_HANDLER: Solenoid:15, changed to %d )", action);
            lisy80_debug(debugbuf);
         }
- } //if sol14 changed
-
+ } //if sol15 changed
+*/
  } //if Riverboat gambler
 
 }

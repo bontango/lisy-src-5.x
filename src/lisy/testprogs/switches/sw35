@@ -1,0 +1,10 @@
+#!/bin/bash
+for i in {1..95}
+do
+./a.out 127.0.0.1 135
+sleep 0.4
+./a.out 127.0.0.1 35
+sleep 0.4
+done
+
+

@@ -109,7 +109,8 @@ static void by35_dispStrobe(int mask) {
         {
           locals.segments[jj*8+ii].w |= locals.pseg[jj*8+ii].w = locals.bcd2seg[locals.bcd[jj] & 0x0f];
 #ifdef LISY_SUPPORT
-          lisy35_display_handler( jj*8+ii, locals.segments[jj*8+ii].w);
+          //lisy35_display_handler( jj*8+ii, locals.segments[jj*8+ii].w);
+          lisy35_display_handler( jj*8+ii, locals.bcd[jj] );
 #endif
         }
     }

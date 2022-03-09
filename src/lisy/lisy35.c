@@ -384,10 +384,33 @@ char by_seg2char( UINT16 seg )
  return mychar;
 }
 
+char my_datchar2( int dat)
+{
+char datchar;
+
+switch (dat) {
+      case 0: datchar = '0'; break;
+      case 1: datchar = '1'; break;
+      case 2: datchar = '2'; break;
+      case 3: datchar = '3'; break;
+      case 4: datchar = '4'; break;
+      case 5: datchar = '5'; break;
+      case 6: datchar = '6'; break;
+      case 7: datchar = '7'; break;
+      case 8: datchar = '8'; break;
+      case 9: datchar = '9'; break;
+      case 10: datchar = ' '; break;
+      case 15: datchar = ' '; break;
+      default: datchar = '-'; break;
+        }
+
+return datchar;
+}
 
 //display handler
 //we use segment value now
-void lisy35_display_handler( int index, UINT16 seg )
+/*
+void lisy35_display_handler( int index, UINT16 seg, int myval )
 {
 
 static UINT16 myseg[56]
@@ -449,7 +472,8 @@ if ( ls80dbg.bitv.displays )
  {
  if ( has_changed )
   {
-    printf("----- Index %d changed to %d -----\n",index,value);
+    //printf("----- Index %d changed to %d -----\n",index,value);
+    printf("----- Index %d changed to %d (bcd:%d) -----\n",index,value,myval);
 
     printf("Player1:>");
     for (i=1; i<=7; i++) printf("%c",by_seg2char(myseg[i]));
@@ -474,6 +498,102 @@ if ( ls80dbg.bitv.displays )
     printf("<\n");
   }
  }//if display debug
+}//display_handler
+*/
+
+//display handler
+void lisy35_display_handler( int index, int value )
+{
+
+static int myvalue[56]
+= { 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
+    80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
+    80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
+    80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
+    80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
+    80, 80, 80, 80, 80, 80 };
+
+int i;
+int has_changed = 0;
+
+
+if ( index > 55 )
+  {
+    fprintf(stderr,"LISY35_DISP_HANDLER: index out of range index:%d  value:%d\n",index,value);
+    return;
+  }
+
+if ( value != myvalue[index] )
+  {
+    has_changed = 1; //for possible debugging only
+switch(index) //reverse order is handled by switch PIC
+   {
+     case 1 ... 7: //Bally player 1
+        display35_show_int( 1, index, value);
+        break;
+     case 9 ... 15: //Bally player 2
+        display35_show_int( 2, index-8, value);
+        break;
+     case 17 ... 23: //Bally player 3
+        display35_show_int( 3, index-16, value);
+        break;
+     case 25 ... 31: //Bally player 4
+        display35_show_int( 4, index-24, value);
+        break;
+     case 33 ... 39: //Bally staus ( full player display )
+        display35_show_int( 0, index-32, value);
+        break;
+     case 41 ... 47: //Bally player 5
+        display35_show_int( 5, index-40, value);
+        break;
+     case 49 ... 55: //Bally player 6 
+        if (value == 15) //special handling (pinmame bug?) (6mill dollar man only)
+		{
+		 value = myvalue[index]; //keep old value
+		 has_changed = 0; //reset debug flag
+		}
+	else display35_show_int( 6, index-48, value);
+        break;
+     default : printf("unknown index:%d (value:%d)\n",index,value);
+	break;
+   }//switch
+    //remember
+    myvalue[index] = value;
+  }
+
+
+if ( ls80dbg.bitv.displays )
+ {
+ if ( has_changed )
+  {
+    printf("----- Index %d changed to %d -----\n",index,value);
+
+    printf("Player1:>");
+    for (i=1; i<=7; i++) printf("%c",my_datchar2(myvalue[i]));
+    printf("<\n");
+    printf("Player2:>");
+    for (i=9; i<=15; i++) printf("%c",my_datchar2(myvalue[i]));
+    printf("<\n");
+    printf("Player3:>");
+    for (i=17; i<=23; i++) printf("%c",my_datchar2(myvalue[i]));
+    printf("<\n");
+    printf("Player4:>");
+    for (i=25; i<=31; i++) printf("%c",my_datchar2(myvalue[i]));
+    printf("<\n");
+    printf(" Status:>");
+    for (i=33; i<=39; i++) printf("%c",my_datchar2(myvalue[i]));
+    printf("<\n");
+    printf("Player5:>");
+    for (i=41; i<=47; i++) printf("%c",my_datchar2(myvalue[i]));
+    printf("<\n");
+    printf("Player6:>");
+    for (i=49; i<=55; i++) printf("%c",my_datchar2(myvalue[i]));
+    printf("<\n");
+  }
+ }//if display debug
+
+
+
 }//display_handler
 
 

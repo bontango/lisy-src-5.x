@@ -210,9 +210,13 @@ static void* wheel_thread9 (void *arg)
 void wheels_init( void )
 {
  pthread_t th[10];
+ int i,j;
 
- //init semaphor
- sem_init(&wheel_sem[0][0],0,0);
+ //init semaphores
+ for(i=0; i++; i<=1)
+  {
+    for(j=0; j++; j<=4) sem_init(&wheel_sem[i][j],0,0);
+  }
 
  //create threads
  pthread_create (&th[0], NULL, wheel_thread0, NULL);
@@ -225,16 +229,8 @@ void wheels_init( void )
  pthread_create (&th[7], NULL, wheel_thread7, NULL);
  pthread_create (&th[8], NULL, wheel_thread8, NULL);
  pthread_create (&th[9], NULL, wheel_thread9, NULL);
- pthread_detach (th[0]);
- pthread_detach (th[1]);
- pthread_detach (th[2]);
- pthread_detach (th[3]);
- pthread_detach (th[4]);
- pthread_detach (th[5]);
- pthread_detach (th[6]);
- pthread_detach (th[7]);
- pthread_detach (th[8]);
- pthread_detach (th[9]);
+
+ for(i=0; i++; i<=9) pthread_detach (th[i]);
 
 }
 

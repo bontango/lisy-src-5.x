@@ -89,14 +89,10 @@ static void* wheel_thread1 (void *arg)
 //player1 digit3
 static void* wheel_thread2 (void *arg) 
 {
-int num;
  while(1) //endless loop
  {
   //wait for semaphor
   sem_wait(&wheel_sem[2]);
-  sem_getvalue(&wheel_sem[2],&num);
-
-printf("in wheel_thread2 sem is %d\n",num);
   //puls the wheel and wait afterwards
   lisyH_special_coil_set( 7, 1);
   delay(lisy_home_ss_special_coil_map[7].pulsetime);
@@ -293,7 +289,7 @@ void wheel_score_reset( void )
      //extra delay if not all wheels are at zero
      check_for_all_zero = is_zero[0][0]+is_zero[0][1]+is_zero[0][2]+is_zero[0][3]+is_zero[0][4];
      check_for_all_zero = check_for_all_zero+is_zero[1][0]+is_zero[1][1]+is_zero[1][2]+is_zero[1][3]+is_zero[1][4];
-     if (check_for_all_zero != 10) delay(300);
+   //  if (check_for_all_zero != 10) delay(300);
         }
 
    //reset postion as well
@@ -311,18 +307,12 @@ void wheel_score_reset( void )
 
 void wheel_thread_pulse( int wheel)
 {
-int num;
   switch(wheel)
   {
 	//display1
    case 5: if ( sem_post(&wheel_sem[0]) < 0) printf("Error semaphore wheel:%d\n",wheel); break;
    case 6: if ( sem_post(&wheel_sem[1]) < 0) printf("Error semaphore wheel:%d\n",wheel); break;
-   case 7: if ( sem_post(&wheel_sem[2]) < 0) printf("Error semaphore wheel:%d\n",wheel);
-printf("inc sem 0 2\n");
-  sem_getvalue(&wheel_sem[2],&num);
-
-printf("sem is %d now\n",num);
- break;
+   case 7: if ( sem_post(&wheel_sem[2]) < 0) printf("Error semaphore wheel:%d\n",wheel); break;
    case 8: if ( sem_post(&wheel_sem[3]) < 0) printf("Error semaphore wheel:%d\n",wheel); break;
    case 9: if ( sem_post(&wheel_sem[4]) < 0) printf("Error semaphore wheel:%d\n",wheel); break;
 	//display2

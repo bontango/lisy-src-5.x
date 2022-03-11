@@ -40,7 +40,8 @@ extern unsigned char lisy35_flipper_disable_status;
 int oldpos[2][5];
 
 //semaphores
-sem_t wheel_sem[2][5];
+pthread_t th[10];
+sem_t wheel_sem[10];
 
 
 /*
@@ -61,7 +62,7 @@ static void* wheel_thread0 (void *arg)
  while(1) //endless loop
  {
   //wait for semaphor
-  sem_wait(&wheel_sem[0][0]);
+  sem_wait(&wheel_sem[0]);
   //puls the wheel and wait afterwards
   lisyH_special_coil_set( 5, 1);
   delay(lisy_home_ss_special_coil_map[5].pulsetime);
@@ -76,7 +77,7 @@ static void* wheel_thread1 (void *arg)
  while(1) //endless loop
  {
   //wait for semaphor
-  sem_wait(&wheel_sem[0][1]);
+  sem_wait(&wheel_sem[1]);
   //puls the wheel and wait afterwards
   lisyH_special_coil_set( 6, 1);
   delay(lisy_home_ss_special_coil_map[6].pulsetime);
@@ -88,10 +89,14 @@ static void* wheel_thread1 (void *arg)
 //player1 digit3
 static void* wheel_thread2 (void *arg) 
 {
+int num;
  while(1) //endless loop
  {
   //wait for semaphor
-  sem_wait(&wheel_sem[0][2]);
+  sem_wait(&wheel_sem[2]);
+  sem_getvalue(&wheel_sem[2],&num);
+
+printf("in wheel_thread2 sem is %d\n",num);
   //puls the wheel and wait afterwards
   lisyH_special_coil_set( 7, 1);
   delay(lisy_home_ss_special_coil_map[7].pulsetime);
@@ -106,7 +111,7 @@ static void* wheel_thread3 (void *arg)
  while(1) //endless loop
  {
   //wait for semaphor
-  sem_wait(&wheel_sem[0][3]);
+  sem_wait(&wheel_sem[3]);
   //puls the wheel and wait afterwards
   lisyH_special_coil_set( 8, 1);
   delay(lisy_home_ss_special_coil_map[8].pulsetime);
@@ -121,7 +126,7 @@ static void* wheel_thread4 (void *arg)
  while(1) //endless loop
  {
   //wait for semaphor
-  sem_wait(&wheel_sem[0][4]);
+  sem_wait(&wheel_sem[4]);
   //puls the wheel and wait afterwards
   lisyH_special_coil_set( 9, 1);
   delay(lisy_home_ss_special_coil_map[9].pulsetime);
@@ -136,7 +141,7 @@ static void* wheel_thread5 (void *arg)
  while(1) //endless loop
  {
   //wait for semaphor
-  sem_wait(&wheel_sem[1][0]);
+  sem_wait(&wheel_sem[5]);
   //puls the wheel and wait afterwards
   lisyH_special_coil_set( 12, 1);
   delay(lisy_home_ss_special_coil_map[12].pulsetime);
@@ -151,7 +156,7 @@ static void* wheel_thread6 (void *arg)
  while(1) //endless loop
  {
   //wait for semaphor
-  sem_wait(&wheel_sem[1][1]);
+  sem_wait(&wheel_sem[6]);
   //puls the wheel and wait afterwards
   lisyH_special_coil_set( 13, 1);
   delay(lisy_home_ss_special_coil_map[13].pulsetime);
@@ -166,7 +171,7 @@ static void* wheel_thread7 (void *arg)
  while(1) //endless loop
  {
   //wait for semaphor
-  sem_wait(&wheel_sem[1][2]);
+  sem_wait(&wheel_sem[7]);
   //puls the wheel and wait afterwards
   lisyH_special_coil_set( 14, 1);
   delay(lisy_home_ss_special_coil_map[14].pulsetime);
@@ -181,7 +186,7 @@ static void* wheel_thread8 (void *arg)
  while(1) //endless loop
  {
   //wait for semaphor
-  sem_wait(&wheel_sem[1][3]);
+  sem_wait(&wheel_sem[8]);
   //puls the wheel and wait afterwards
   lisyH_special_coil_set( 15, 1);
   delay(lisy_home_ss_special_coil_map[15].pulsetime);
@@ -196,7 +201,7 @@ static void* wheel_thread9 (void *arg)
  while(1) //endless loop
  {
   //wait for semaphor
-  sem_wait(&wheel_sem[1][4]);
+  sem_wait(&wheel_sem[9]);
   //puls the wheel and wait afterwards
   lisyH_special_coil_set( 16, 1);
   delay(lisy_home_ss_special_coil_map[16].pulsetime);
@@ -209,14 +214,10 @@ static void* wheel_thread9 (void *arg)
 //create the threads for the wheel pulsing
 void wheels_init( void )
 {
- pthread_t th[10];
  int i,j;
 
  //init semaphores
- for(i=0; i++; i<=1)
-  {
-    for(j=0; j++; j<=4) sem_init(&wheel_sem[i][j],0,0);
-  }
+ for(i=0; i++; i<=9) sem_init(&wheel_sem[i],0,0);
 
  //create threads
  pthread_create (&th[0], NULL, wheel_thread0, NULL);
@@ -310,22 +311,26 @@ void wheel_score_reset( void )
 
 void wheel_thread_pulse( int wheel)
 {
-
+int num;
   switch(wheel)
   {
 	//display1
-   case 5: sem_post(&wheel_sem[0][0]); break;
-   case 6: sem_post(&wheel_sem[0][1]); break;
-   case 7: sem_post(&wheel_sem[0][2]); break;
-   case 8: sem_post(&wheel_sem[0][3]); break;
-   case 9: sem_post(&wheel_sem[0][4]); break;
-	//display2
-   case 12: sem_post(&wheel_sem[1][0]); break;
-   case 13: sem_post(&wheel_sem[1][1]); break;
-   case 14: sem_post(&wheel_sem[1][2]); break;
-   case 15: sem_post(&wheel_sem[1][3]); break;
-   case 16: sem_post(&wheel_sem[1][4]); break;
+   case 5: if ( sem_post(&wheel_sem[0]) < 0) printf("Error semaphore wheel:%d\n",wheel); break;
+   case 6: if ( sem_post(&wheel_sem[1]) < 0) printf("Error semaphore wheel:%d\n",wheel); break;
+   case 7: if ( sem_post(&wheel_sem[2]) < 0) printf("Error semaphore wheel:%d\n",wheel);
+printf("inc sem 0 2\n");
+  sem_getvalue(&wheel_sem[2],&num);
 
+printf("sem is %d now\n",num);
+ break;
+   case 8: if ( sem_post(&wheel_sem[3]) < 0) printf("Error semaphore wheel:%d\n",wheel); break;
+   case 9: if ( sem_post(&wheel_sem[4]) < 0) printf("Error semaphore wheel:%d\n",wheel); break;
+	//display2
+   case 12: if ( sem_post(&wheel_sem[5]) < 0) printf("Error semaphore wheel:%d\n",wheel); break;
+   case 13: if ( sem_post(&wheel_sem[6]) < 0) printf("Error semaphore wheel:%d\n",wheel); break;
+   case 14: if ( sem_post(&wheel_sem[7]) < 0) printf("Error semaphore wheel:%d\n",wheel); break;
+   case 15: if ( sem_post(&wheel_sem[8]) < 0) printf("Error semaphore wheel:%d\n",wheel); break;
+   case 16: if ( sem_post(&wheel_sem[9]) < 0) printf("Error semaphore wheel:%d\n",wheel); break;
   }
 
 

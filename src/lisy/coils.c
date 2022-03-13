@@ -1056,7 +1056,7 @@ void lisyh_coil_select_solenoid_driver(void)
     mydata_coil.bitv5.IS_CMD = 1;        //we are sending a command here
     mydata_coil.bitv5.COMMAND = LISYH_COILCMD_SEL_SOLBOARD_NO;
     mydata_coil.bitv5.EXT_CMD = 0; //RTH need to be extended to two boards
-
+ 
     //write to PIC
     lisy80_write_byte_coil_pic(  mydata_coil.byte );
 
@@ -1120,7 +1120,6 @@ void lisyh_coil_set( int coil, int action)
      sprintf(debugbuf,"set LISY_home coil %d to %d",coil+1,action);
      lisy80_debug(debugbuf);
     }//debug
-
 
         //write to PIC
         lisy80_write_byte_coil_pic(  mydata_coil.byte );
@@ -1255,4 +1254,20 @@ void lisyh_led_set_LED_color(unsigned char line, unsigned char led,
 	}
     }//debug
 
+}
+
+//init all special coils
+void lisyh_init_special_coils(void)
+{
+ int i;
+
+ //deactivate all special solenoids with a mapping
+ for ( i=0; i<=19; i++)
+ {
+        if ( lisy_home_ss_special_coil_map[i].mapped_to_coil != 0)
+        {
+         lisyh_coil_set(  lisy_home_ss_special_coil_map[i].mapped_to_coil, 0);
+         delay (5); // 5 milliseconds delay from wiringpi library for PIC
+        }
+ }
 }

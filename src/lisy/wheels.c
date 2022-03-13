@@ -1,7 +1,7 @@
 /*
  whheels.c
  part of lisy_home for Starship
- December 2021
+ March 2022
  bontango
 */
 
@@ -12,8 +12,6 @@
 #include <time.h>
 #include <sys/time.h>
 #include <wiringPi.h>
-#include <pthread.h>
-#include <semaphore.h>
 #include "lisy35.h"
 #include "fileio.h"
 #include "hw_lib.h"
@@ -38,11 +36,11 @@ extern unsigned char lisy35_flipper_disable_status;
 
 //internal to wheels
 int oldpos[2][5];
-
-//semaphores
-pthread_t th[10];
-sem_t wheel_sem[10];
-
+#define WHEEL_STATE_OFF 0
+#define WHEEL_STATE_ON 1
+#define WHEEL_STATE_DELAY 2
+int wheel_pulses_needed[2][5] = { { 0,0,0,0,0},{ 0,0,0,0,0 } };
+int wheel_state[2][5] = { { 0,0,0,0,0},{ 0,0,0,0,0 } };
 
 /*
 coil and switches
@@ -53,187 +51,85 @@ coil and switches
 9 - 45;Display 1;Pos0  10;
 */
 
-//we do it with threads in order not to block pinmame
-//while pulsing (slow) wheels
+//calculate solenoid from display digit
+int digit2sol( int display, int digit)
+{
+  //fix mapping is
+  // sol 5,6,7,8,9 for display1
+  // sol 12,13,14,15,16 for display2
 
-//player1 digit1
-static void* wheel_thread0 (void *arg) 
-{
- while(1) //endless loop
- {
-  //wait for semaphor
-  sem_wait(&wheel_sem[0]);
-  //puls the wheel and wait afterwards
-  lisyH_special_coil_set( 5, 1);
-  delay(lisy_home_ss_special_coil_map[5].pulsetime);
-  lisyH_special_coil_set( 5, 0);
-  delay(lisy_home_ss_special_coil_map[5].delay);
- }
- return(arg);
-}
-//player1 digit2
-static void* wheel_thread1 (void *arg) 
-{
- while(1) //endless loop
- {
-  //wait for semaphor
-  sem_wait(&wheel_sem[1]);
-  //puls the wheel and wait afterwards
-  lisyH_special_coil_set( 6, 1);
-  delay(lisy_home_ss_special_coil_map[6].pulsetime);
-  lisyH_special_coil_set( 6, 0);
-  delay(lisy_home_ss_special_coil_map[6].delay);
- }
- return(arg);
-}
-//player1 digit3
-static void* wheel_thread2 (void *arg) 
-{
- while(1) //endless loop
- {
-  //wait for semaphor
-  sem_wait(&wheel_sem[2]);
-  //puls the wheel and wait afterwards
-  lisyH_special_coil_set( 7, 1);
-  delay(lisy_home_ss_special_coil_map[7].pulsetime);
-  lisyH_special_coil_set( 7, 0);
-  delay(lisy_home_ss_special_coil_map[7].delay);
- }
- return(arg);
-}
-//player1 digit4
-static void* wheel_thread3 (void *arg) 
-{
- while(1) //endless loop
- {
-  //wait for semaphor
-  sem_wait(&wheel_sem[3]);
-  //puls the wheel and wait afterwards
-  lisyH_special_coil_set( 8, 1);
-  delay(lisy_home_ss_special_coil_map[8].pulsetime);
-  lisyH_special_coil_set( 8, 0);
-  delay(lisy_home_ss_special_coil_map[8].delay);
- }
- return(arg);
-}
-//player1 digit5
-static void* wheel_thread4 (void *arg) 
-{
- while(1) //endless loop
- {
-  //wait for semaphor
-  sem_wait(&wheel_sem[4]);
-  //puls the wheel and wait afterwards
-  lisyH_special_coil_set( 9, 1);
-  delay(lisy_home_ss_special_coil_map[9].pulsetime);
-  lisyH_special_coil_set( 9, 0);
-  delay(lisy_home_ss_special_coil_map[9].delay);
- }
- return(arg);
-}
-//player2 digit1
-static void* wheel_thread5 (void *arg)
-{
- while(1) //endless loop
- {
-  //wait for semaphor
-  sem_wait(&wheel_sem[5]);
-  //puls the wheel and wait afterwards
-  lisyH_special_coil_set( 12, 1);
-  delay(lisy_home_ss_special_coil_map[12].pulsetime);
-  lisyH_special_coil_set( 12, 0);
-  delay(lisy_home_ss_special_coil_map[12].delay);
- }
- return(arg);
-}
-//player2 digit2
-static void* wheel_thread6 (void *arg)
-{
- while(1) //endless loop
- {
-  //wait for semaphor
-  sem_wait(&wheel_sem[6]);
-  //puls the wheel and wait afterwards
-  lisyH_special_coil_set( 13, 1);
-  delay(lisy_home_ss_special_coil_map[13].pulsetime);
-  lisyH_special_coil_set( 13, 0);
-  delay(lisy_home_ss_special_coil_map[13].delay);
- }
- return(arg);
-}
-//player2 digit3
-static void* wheel_thread7 (void *arg)
-{
- while(1) //endless loop
- {
-  //wait for semaphor
-  sem_wait(&wheel_sem[7]);
-  //puls the wheel and wait afterwards
-  lisyH_special_coil_set( 14, 1);
-  delay(lisy_home_ss_special_coil_map[14].pulsetime);
-  lisyH_special_coil_set( 14, 0);
-  delay(lisy_home_ss_special_coil_map[14].delay);
- }
- return(arg);
-}
-//player2 digit4
-static void* wheel_thread8 (void *arg)
-{
- while(1) //endless loop
- {
-  //wait for semaphor
-  sem_wait(&wheel_sem[8]);
-  //puls the wheel and wait afterwards
-  lisyH_special_coil_set( 15, 1);
-  delay(lisy_home_ss_special_coil_map[15].pulsetime);
-  lisyH_special_coil_set( 15, 0);
-  delay(lisy_home_ss_special_coil_map[15].delay);
- }
- return(arg);
-}
-//player2 digit5
-static void* wheel_thread9 (void *arg)
-{
- while(1) //endless loop
- {
-  //wait for semaphor
-  sem_wait(&wheel_sem[9]);
-  //puls the wheel and wait afterwards
-  lisyH_special_coil_set( 16, 1);
-  delay(lisy_home_ss_special_coil_map[16].pulsetime);
-  lisyH_special_coil_set( 16, 0);
-  delay(lisy_home_ss_special_coil_map[16].delay);
- }
- return(arg);
+ return ( ( 5 + digit) + ( 7 * display));
+
+
 }
 
-//create the threads for the wheel pulsing
-void wheels_init( void )
+//this routine is called from lisy35_throttle
+//in order not to block game while pulsing (slow) wheels
+//RTH v1 with fix time ( expect to be called each 4 ms )
+void wheels_refresh(void)
 {
- int i,j;
+	int i,j,state,coil;
+	static int pulse_time[2][5];
+	static int delay_time[2][5];
 
- //init semaphores
- for(i=0; i++; i<=9) sem_init(&wheel_sem[i],0,0);
+  //check all 10 wheels
+  for(i=0; i<=1; i++) {
+  	for(j=0; j<=4; j++) {
 
- //create threads
- pthread_create (&th[0], NULL, wheel_thread0, NULL);
- pthread_create (&th[1], NULL, wheel_thread1, NULL);
- pthread_create (&th[2], NULL, wheel_thread2, NULL);
- pthread_create (&th[3], NULL, wheel_thread3, NULL);
- pthread_create (&th[4], NULL, wheel_thread4, NULL);
- pthread_create (&th[5], NULL, wheel_thread5, NULL);
- pthread_create (&th[6], NULL, wheel_thread6, NULL);
- pthread_create (&th[7], NULL, wheel_thread7, NULL);
- pthread_create (&th[8], NULL, wheel_thread8, NULL);
- pthread_create (&th[9], NULL, wheel_thread9, NULL);
+	//state of current digit
+	switch(wheel_state[i][j])
+	{
+	 case WHEEL_STATE_OFF: //wheel is ready for pulse
+		if ( wheel_pulses_needed[i][j] > 0) //do we need to pulse?
+		 {
+		  //yes store pulse and delay time for this digit
+		  //decrement puls couinter and change state to ON
+		  if ( wheel_pulses_needed[i][j] >= 10 )  //complete round is not needed
+		   {
+		    wheel_pulses_needed[i][j] -= 10;
+		    if ( wheel_pulses_needed[i][j] == 0 ) break;
+		   }
+		  else { wheel_pulses_needed[i][j] -= 1; }
+		  coil = digit2sol(i, j);
+		  lisyh_coil_set(  lisy_home_ss_special_coil_map[coil].mapped_to_coil, 1);
+		  pulse_time[i][j] = lisy_home_ss_special_coil_map[coil].pulsetime;
+		  delay_time[i][j] = lisy_home_ss_special_coil_map[coil].delay;
+		  wheel_state[i][j] = WHEEL_STATE_ON;
+		 }
+		break;
 
- for(i=0; i++; i<=9) pthread_detach (th[i]);
+	 case WHEEL_STATE_ON: //wheel is active, count down pulstime
+		pulse_time[i][j] = pulse_time[i][j] -5; //5ms per call
+		if ( pulse_time[i][j] <= 0 ) //pulse time expired?
+		 {
+		  //yes deactivate sol and change state to DELAY
+		  coil = digit2sol(i, j);
+		  lisyh_coil_set(  lisy_home_ss_special_coil_map[coil].mapped_to_coil, 0);
+		  wheel_state[i][j] = WHEEL_STATE_DELAY;
+		 }
+		break;
+
+	 case WHEEL_STATE_DELAY: //wheel inactive but in delay state ( we need to prevent too fast pulsing)
+		delay_time[i][j] = delay_time[i][j] -5; //5ms per call
+		if ( delay_time[i][j] <= 0 ) //delay_time time expired?
+		 {
+		  //yes change state to DELAY
+		  wheel_state[i][j] = WHEEL_STATE_OFF;
+		 }
+		break;
+
+	}//state
+   } //j
+  } //i
+
+
+
 
 }
 
 /* wheel_pulse
 	coil -> nr of coil
-	this routine respect pulsetime and mapping
+	this routine respect pulsetime, mapping and delay
 	from config file LisyH (Starship)
 */
 void wheel_pulse ( int coil )
@@ -244,13 +140,12 @@ void wheel_pulse ( int coil )
   lisyh_coil_set(  lisy_home_ss_special_coil_map[coil].mapped_to_coil, 1);
   delay (lisy_home_ss_special_coil_map[coil].pulsetime); // milliseconds delay from wiringpi library
   lisyh_coil_set(  lisy_home_ss_special_coil_map[coil].mapped_to_coil, 0);
-  //delay (lisy_home_ss_special_coil_map[coil].delay); // milliseconds delay from wiringpi library
+  delay (lisy_home_ss_special_coil_map[coil].delay); // milliseconds delay from wiringpi library
  }
 
 }
 
 //set all wheels to 'zero' position
-//display1 only at the moment
 void wheel_score_reset( void )
 {
 
@@ -289,6 +184,7 @@ void wheel_score_reset( void )
      //extra delay if not all wheels are at zero
      check_for_all_zero = is_zero[0][0]+is_zero[0][1]+is_zero[0][2]+is_zero[0][3]+is_zero[0][4];
      check_for_all_zero = check_for_all_zero+is_zero[1][0]+is_zero[1][1]+is_zero[1][2]+is_zero[1][3]+is_zero[1][4];
+   //RTH needed?
    //  if (check_for_all_zero != 10) delay(300);
         }
 
@@ -303,30 +199,53 @@ void wheel_score_reset( void )
   }
 }
 
-
-
-void wheel_thread_pulse( int wheel)
+void wheels_show_int( int display, int digit, unsigned char dat)
 {
-  switch(wheel)
-  {
-	//display1
-   case 5: if ( sem_post(&wheel_sem[0]) < 0) printf("Error semaphore wheel:%d\n",wheel); break;
-   case 6: if ( sem_post(&wheel_sem[1]) < 0) printf("Error semaphore wheel:%d\n",wheel); break;
-   case 7: if ( sem_post(&wheel_sem[2]) < 0) printf("Error semaphore wheel:%d\n",wheel); break;
-   case 8: if ( sem_post(&wheel_sem[3]) < 0) printf("Error semaphore wheel:%d\n",wheel); break;
-   case 9: if ( sem_post(&wheel_sem[4]) < 0) printf("Error semaphore wheel:%d\n",wheel); break;
-	//display2
-   case 12: if ( sem_post(&wheel_sem[5]) < 0) printf("Error semaphore wheel:%d\n",wheel); break;
-   case 13: if ( sem_post(&wheel_sem[6]) < 0) printf("Error semaphore wheel:%d\n",wheel); break;
-   case 14: if ( sem_post(&wheel_sem[7]) < 0) printf("Error semaphore wheel:%d\n",wheel); break;
-   case 15: if ( sem_post(&wheel_sem[8]) < 0) printf("Error semaphore wheel:%d\n",wheel); break;
-   case 16: if ( sem_post(&wheel_sem[9]) < 0) printf("Error semaphore wheel:%d\n",wheel); break;
-  }
 
+   int i;
+   int pos[2][5],pulses;
 
+   //ignore 'spaces' , display >1 and digit >6
+   if ( dat > 9 ) return;
+   if ( display > 2 ) return;
+   if ( digit > 6 ) return;
+   //ignore credit display for the moment
+   if ( display == 0 ) return;
+
+   if ( lisy35_flipper_disable_status == 0) //flipper enabled?
+     {
+	//adjust numbers
+	display--;
+	digit--; //digit = digit -2
+	digit--;
+        //assign position
+	pos[display][digit] = dat;
+	//calculate pulses
+        pulses = oldpos[display][digit] - pos[display][digit];
+        if (  pulses > 0 )  pulses = abs( 10 -  pulses);
+        if (  pulses < 0 )  pulses = abs( pulses);
+
+	//if ( ls80dbg.bitv.displays )
+        if ( 1 )
+  	{
+	  sprintf(debugbuf,"wheels_show_int: display:%d digit:%d dat:%d (old dat%d   %d pulses needed)\n",display,digit,dat, oldpos[display][digit],pulses);
+    	  lisy80_debug(debugbuf);
+  	}
+
+        //store new value
+        oldpos[display][digit] = pos[display][digit];
+
+	//set local var for pulses needed
+	//will becoming active with wheel_refresh via lisy35_throtle
+	wheel_pulses_needed[display][digit] += pulses;
+
+    }//flipper enabled?
 }
 
+
+//************************************
 //called from lisy200_control only
+//************************************
 void wheel_score( int display, char *data)
 {
    int i,k;
@@ -379,77 +298,15 @@ void wheel_score( int display, char *data)
 	 }
 
 	//display2
-	while ( pulses[0][0]-- >0 ) wheel_thread_pulse(5);
-	while ( pulses[0][1]-- >0 ) wheel_thread_pulse(6);
-	while ( pulses[0][2]-- >0 ) wheel_thread_pulse(7);
-	while ( pulses[0][3]-- >0 ) wheel_thread_pulse(8);
-	while ( pulses[0][4]-- >0 ) wheel_thread_pulse(9);
+	while ( pulses[0][0]-- >0 ) wheel_pulse(5);
+	while ( pulses[0][1]-- >0 ) wheel_pulse(6);
+	while ( pulses[0][2]-- >0 ) wheel_pulse(7);
+	while ( pulses[0][3]-- >0 ) wheel_pulse(8);
+	while ( pulses[0][4]-- >0 ) wheel_pulse(9);
 	//display2
-	while ( pulses[1][0]-- >0 ) wheel_thread_pulse(12);
-	while ( pulses[1][1]-- >0 ) wheel_thread_pulse(13);
-	while ( pulses[1][2]-- >0 ) wheel_thread_pulse(14);
-	while ( pulses[1][3]-- >0 ) wheel_thread_pulse(15);
-	while ( pulses[1][4]-- >0 ) wheel_thread_pulse(16);
-}
-
-void wheels_show_int( int display, int digit, unsigned char dat)
-{
-
-   int i;
-   int pos[2][5],pulses;
-
-   //ignore 'spaces' , display >1 and digit >6
-   if ( dat > 9 ) return;
-   if ( display > 2 ) return;
-   if ( digit > 6 ) return;
-   //ignore credit display for the moment
-   if ( display == 0 ) return;
-
-   if ( lisy35_flipper_disable_status == 0) //flipper enabled?
-     {
-	//adjust numbers
-	display--;
-	digit--; //digit = digit -2
-	digit--;
-        //assign position
-	pos[display][digit] = dat;
-	//calculate pulses
-        pulses = oldpos[display][digit] - pos[display][digit];
-        if (  pulses > 0 )  pulses = abs( 10 -  pulses);
-        if (  pulses < 0 )  pulses = abs( pulses);
-
-	//if ( ls80dbg.bitv.displays )
-        if ( 1 )
-  	{
-	  sprintf(debugbuf,"wheels: display:%d digit:%d dat:%d (old dat%d   %d pulses needed)\n",display,digit,dat, oldpos[display][digit],pulses);
-    	  lisy80_debug(debugbuf);
-  	}
-
-        //store new value
-        oldpos[display][digit] = pos[display][digit];
-
-     if(display==0)
-     {
-	switch(digit)
-	{
-	  case 0: while ( pulses-- >0 ) wheel_thread_pulse(5); break;
-	  case 1: while ( pulses-- >0 ) wheel_thread_pulse(6); break;
-	  case 2: while ( pulses-- >0 ) wheel_thread_pulse(7); break;
-	  case 3: while ( pulses-- >0 ) wheel_thread_pulse(8); break;
-	  case 4: while ( pulses-- >0 ) wheel_thread_pulse(9); break;
-	}
-     }
-     if(display==1)
-     {
-        switch(digit)
-        {
-          case 0: while ( pulses-- >0 ) wheel_thread_pulse(12); break;
-          case 1: while ( pulses-- >0 ) wheel_thread_pulse(13); break;
-          case 2: while ( pulses-- >0 ) wheel_thread_pulse(14); break;
-          case 3: while ( pulses-- >0 ) wheel_thread_pulse(15); break;
-          case 4: while ( pulses-- >0 ) wheel_thread_pulse(16); break;
-        }
-     }
-
-    }//flipper enabled?
+	while ( pulses[1][0]-- >0 ) wheel_pulse(12);
+	while ( pulses[1][1]-- >0 ) wheel_pulse(13);
+	while ( pulses[1][2]-- >0 ) wheel_pulse(14);
+	while ( pulses[1][3]-- >0 ) wheel_pulse(15);
+	while ( pulses[1][4]-- >0 ) wheel_pulse(16);
 }

@@ -182,8 +182,9 @@ void lisy35_ss_init( void )
  lisyh_coil_select_led_driver_line(1);
  // send colorcodes to LED driver
  lisy_home_ss_send_led_colors();
- //start threads for wheels
- wheels_init();
+
+ //deactivate all special solenoids with a mapping
+ lisyh_init_special_coils();
 
  //collect latest informations and start the lisy logger
  lisy_env.has_soundcard = lisy35_has_soundcard;
@@ -1002,6 +1003,9 @@ if (first)
  // we choose 8msec as the throttle routine is placed within the zero-cross interrupt
  //we need to slow down a bit
 
+ //for Starship use the time to update wheels
+ if ( lisy_hardware_revision == 200 ) wheels_refresh();
+
  //see how many micros passed
  now = micros();
  //beware of 'wrap' which happens each 71 minutes
@@ -1010,7 +1014,7 @@ if (first)
  //calculate difference and sleep a bit
  sleeptime = g_lisy35_throttle_val - ( now - last);
  if (sleeptime > 0) delayMicroseconds ( sleeptime );
- 
+
  //store current time for next round with speed limitc
  last = micros();
 

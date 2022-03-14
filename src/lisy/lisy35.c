@@ -56,6 +56,9 @@ unsigned char lisy35_J4PIN8_is_strobe = 0;
 unsigned char lisy35_okaegi_mod = 0;
 
 
+//from lisy.c set in lisy_home.c
+extern unsigned char lisy_home_ss_2canplay_lamp_status;
+
 //from coils.c
 extern unsigned char lisy35_bally_hw_check_finished;
 
@@ -636,6 +639,22 @@ if ( ( ls80dbg.bitv.basic ) & ( ret == 80))
      --ret;
    }
  }
+
+//ignore credit switch if we running on Starship
+//and 2canplay lamp is ON
+if ( ( ret == 5 ) & (action == 1))
+{
+  if ( ( lisy_hardware_revision == 200 ) & ( lisy_home_ss_2canplay_lamp_status == 1))
+  {
+	ret = 80;
+
+        //if ( ls80dbg.bitv.switches )
+        if ( 1 )
+        {
+           lisy80_debug("LISY35_SWITCH_READER: 2canplay activ: credit ignored");
+        }
+  }
+}
 
 //NOTE: system has has 6*8==40 switches in maximum, counting 1...48; ...
 //we use 'internal strobe 6' to handle special switches in the same way ( TEST=49,S33=50 )

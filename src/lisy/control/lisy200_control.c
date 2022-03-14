@@ -2229,10 +2229,6 @@ int main(int argc, char *argv[])
     //read the descriptions for the coils
     get_coil_descriptions();
 
-    //init threads for wheels
-    wheels_init();
-
-
  // try say something about LISY80 if sound is requested
  if ( ls80opt.bitv.JustBoom_sound )
  {

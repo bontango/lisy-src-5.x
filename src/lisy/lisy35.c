@@ -1216,7 +1216,10 @@ int lisy35_get_mpudips( int switch_nr )
 
 
  //use function from fileio.c
- ret = lisy35_file_get_mpudips( switch_nr, ls80dbg.bitv.basic, dip_file_name );
+ if ( lisy_hardware_revision == 200 )
+    ret = lisy200_file_get_mpudips( switch_nr, ls80dbg.bitv.basic, dip_file_name );
+ else
+    ret = lisy35_file_get_mpudips( switch_nr, ls80dbg.bitv.basic, dip_file_name );
  //debug?
  if ( first_time)  //only one Info line
   {

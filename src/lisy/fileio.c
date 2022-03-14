@@ -1779,3 +1779,121 @@ else
 
  return 0;
 }
+
+//read dipswitchsettings for specific game/mpu
+//and give back settings or -1 in case of error
+//switch_nr is 0..3
+//lisy200 (Starship) version based on lisy35
+int lisy200_file_get_mpudips( int switch_nr, int debug, char *dip_setting_filename )
+{
+
+ typedef union dips {
+    unsigned char byte;
+    struct {
+    unsigned DIP1:1, DIP2:1, DIP3:1, DIP4:1, DIP5:1, DIP6:1, DIP7:1, DIP8:1;
+    //unsigned b0:1, b1:1, b2:1, b3:1, b4:1, b5:1, b6:1, b7:1;
+        } bitv;
+    }t_dips;
+
+
+ static t_dips lisy35_dip[4];
+ static int first_time = 1;
+ static char dip_file_name[80];
+ static char first_time_debug[4] = { 1,1,1,1 };
+
+ int i;
+ FILE *fstream;
+ unsigned char dip[32];
+ unsigned char dipvalue;
+ char buffer[1024];
+ int dip_nr;
+ char *on_or_off;
+ char *line;
+ int first_line = 1;
+
+//read dip switch settings only once
+ if (first_time)
+ {
+  //reset flag
+  first_time = 0;
+  //set the defaults
+  for (i=0; i<=3; i++) lisy35_dip[i].byte = -1;
+
+  //construct the filename; 
+  sprintf(dip_file_name,"%s%s",LISY200_DIPS_PATH,LISY200_DIPS_FILE);
+  //copy filename where we was successfull to give back to calling routine
+  strcpy( dip_setting_filename, dip_file_name);
+
+  //try to read 
+  fstream = fopen(dip_file_name,"r");
+
+ //check if first or second try where successfull
+  //if it is still NULL both tries where not successfull
+  if(fstream == NULL)
+      {
+        sprintf(dip_file_name,"PINMAME default as no file specified");
+        //copy filename where we was successfull to give back to calling routine
+        strcpy( dip_setting_filename, dip_file_name);
+        return -1;
+        }
+
+   //at this point we have a valid file descriptor
+   do
+   {
+     line=fgets(buffer,sizeof(buffer),fstream);
+     if (first_line) { first_line=0; continue; } //skip first line (Header)
+     //interpret the line
+     dip_nr = atoi(strtok(line, ";"));
+     on_or_off = strdup(strtok(NULL, ";"));
+     if ( strcmp( on_or_off, "ON") == 0) dipvalue = 1; else dipvalue = 0;
+     //assign dip value to temp var
+     dip[dip_nr-1] = dipvalue;
+   }
+   while((line!=NULL) && (dip_nr!=32)); //make some basic reading checks
+
+   //any error?
+   if((line==NULL) || (dip_nr!=32)) return -1;
+
+   //assign the dip settings
+   for (i=0; i<=3; i++)
+    {
+        lisy35_dip[i].bitv.DIP1 =  dip[i*8 ];
+        lisy35_dip[i].bitv.DIP2 =  dip[i*8 + 1];
+        lisy35_dip[i].bitv.DIP3 =  dip[i*8 + 2];
+        lisy35_dip[i].bitv.DIP4 =  dip[i*8 + 3];
+        lisy35_dip[i].bitv.DIP5 =  dip[i*8 + 4];
+        lisy35_dip[i].bitv.DIP6 =  dip[i*8 + 5];
+        lisy35_dip[i].bitv.DIP7 =  dip[i*8 + 6];
+        lisy35_dip[i].bitv.DIP8 =  dip[i*8 + 7];
+    }
+
+   fclose(fstream);
+
+ } //done only first_time
+
+ //debug?
+ if(debug) 
+  {
+   if( first_time_debug[switch_nr] ) //only one time debug as bally tend to do that too often
+    {
+    fprintf(stderr,"mpudips return: ");
+    fprintf(stderr,"%d", lisy35_dip[switch_nr].bitv.DIP1);
+    fprintf(stderr,"%d", lisy35_dip[switch_nr].bitv.DIP2);
+    fprintf(stderr,"%d", lisy35_dip[switch_nr].bitv.DIP3);
+    fprintf(stderr,"%d", lisy35_dip[switch_nr].bitv.DIP4);
+    fprintf(stderr,"%d", lisy35_dip[switch_nr].bitv.DIP5);
+    fprintf(stderr,"%d", lisy35_dip[switch_nr].bitv.DIP6);
+    fprintf(stderr,"%d", lisy35_dip[switch_nr].bitv.DIP7);
+    fprintf(stderr,"%d", lisy35_dip[switch_nr].bitv.DIP8);
+    fprintf(stderr," for switch:%d\n\r",switch_nr);
+    }
+   first_time_debug[switch_nr] = 0;
+   }
+ 
+ //copy filename where we was successfull to give back to calling routine
+ strcpy( dip_setting_filename, dip_file_name);
+
+ //return setting, this will be -1 if 'first_time' failed
+ return lisy35_dip[switch_nr].byte;
+
+}

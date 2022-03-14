@@ -102,6 +102,9 @@ int lisy_file_get_home_ss_lamp_mappings(int variant);
 int  lisy_file_get_home_ss_coil_mappings(int variant);
 int  lisy_file_get_home_ss_special_coil_mappings(int variant);
 
+//lisy200 (Starship) stuff
+int lisy200_file_get_mpudips( int switch_nr, int debug, char *dip_setting_filename );
+unsigned char lisy200_file_get_onedip( int dip_nr, char *dip_comment, char *dip_setting_filenamee, int re_init );
 
 /* LISY80 stuff */
 #define LISY80_GAMES_CSV "/boot/lisy/lisy80/cfg/lisy80games.csv"
@@ -157,6 +160,10 @@ int  lisy_file_get_home_ss_special_coil_mappings(int variant);
 /* generalLISY stuff */
 #define LISY_WELCOME_MSG_FILE "/boot/lisy/lisy/Welcome.msg"
 #define LISY_VOLUME_LEVEL "/boot/lisy/lisy/volume_level"
+
+/* LISY200 (Starship) stuff */
+#define LISY200_DIPS_PATH "/boot/lisy/lisyH/dips/"
+#define LISY200_DIPS_FILE "Starship_dips.csv"
 
 #endif  // _FILEIO_H
 

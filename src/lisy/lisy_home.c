@@ -243,7 +243,7 @@ void lisy_home_ss_lamp_set( int lamp, int action)
   int i;
 
   //2canplay lamp blocks credit switch ( only 2 players on Starship)
-  if ( lamp == 28) lisy_home_ss_2canplay_lamp_status = action;
+  if ( lamp == LISY_HOME_SS_LAMP_2CANPLAY) lisy_home_ss_2canplay_lamp_status = action;
 
   //how many mappings?
   for ( i=0; i<lisy_home_ss_lamp_map[lamp].no_of_maps; i++)

@@ -36,6 +36,8 @@ extern unsigned char lisy35_flipper_disable_status;
 
 //internal to wheels
 int oldpos[2][5];
+int oldpos_credit[2];
+int oldpos_ball[2];
 #define WHEEL_STATE_OFF 0
 #define WHEEL_STATE_ON 1
 #define WHEEL_STATE_DELAY 2
@@ -220,12 +222,18 @@ void wheels_show_int( int display, int digit, unsigned char dat)
    int i;
    int pos[2][5],pulses;
 
+   //ignore credit display for the moment
+   if ( display == 0 )
+	{
+	 printf(" RTH wheels_show_int: display:%d digit:%d dat:%d\n",display,digit,dat); 	
+	 return;
+	}
+
    //ignore 'spaces' , display >1 and digit >6
    if ( dat > 9 ) return;
    if ( display > 2 ) return;
    if ( digit > 6 ) return;
-   //ignore credit display for the moment
-   if ( display == 0 ) return;
+
 
    if ( lisy35_flipper_disable_status == 0) //flipper enabled?
      {

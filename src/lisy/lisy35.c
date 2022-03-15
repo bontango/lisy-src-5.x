@@ -180,6 +180,7 @@ void lisy35_ss_init( void )
  lisy_file_get_home_ss_lamp_mappings(dip_value);
  lisy_file_get_home_ss_coil_mappings(dip_value);
  lisy_file_get_home_ss_special_coil_mappings(dip_value);
+ lisy_file_get_home_ss_special_lamp_mappings(dip_value);
  //select solenoidboard by default
  lisyh_coil_select_solenoid_driver();
  lisyh_coil_select_led_driver_line(1);

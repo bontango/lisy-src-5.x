@@ -62,6 +62,14 @@ typedef struct
 }
 t_lisy_home_ss_special_coil_map;
 
+//starship special lamps ( Ball in Play Match )
+typedef struct
+{
+  unsigned char no_of_maps;
+  unsigned char mapped_to_line[8];
+  unsigned char mapped_to_led[8];
+}
+t_lisy_home_ss_special_lamp_map;
 
 void lisy_home_ss_mom_coil_set( unsigned char value);
 void lisy_home_ss_cont_coil_set( unsigned char cont_data);
@@ -74,6 +82,10 @@ void lisy_home_ss_send_led_colors( void);
 #define LISY_HOME_EVENT_SWITCH 3
 #define LISY_HOME_EVENT_LAMP 4
 #define LISY_HOME_EVENT_DISPLAY 5
+
+//special lamps on Starship
+#define LISY_HOME_SS_LAMP_2CANPLAY 28
+
 
 #endif  /* LISY_HOME_H */
 

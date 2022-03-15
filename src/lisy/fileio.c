@@ -1600,6 +1600,8 @@ for(i=0; i<=59;i++)
   { 
      lisy_home_ss_lamp_map[i].no_of_maps = 0;
   }
+
+//colorcodes default all 0
 for(i=0; i<=5;i++) 
   { 
 	for(k=0; k<=47;k++) 
@@ -1896,4 +1898,75 @@ int lisy200_file_get_mpudips( int switch_nr, int debug, char *dip_setting_filena
  //return setting, this will be -1 if 'first_time' failed
  return lisy35_dip[switch_nr].byte;
 
+}
+
+//read the csv file for lisy Home Starship special lamp to LED mapping /lisy partition
+//give -1 in case we had an error
+//fill structure 
+//reads also led colorcodes(init done in ss_lamp_mapping!)
+int  lisy_file_get_home_ss_special_lamp_mappings(int variant)
+{
+ char buffer[1024];
+ char *line;
+ char file_name[80];
+ int no;
+ int is_coil;
+ int first_line = 1;
+ FILE *fstream;
+ int i,dum;
+ unsigned char ledline,led;
+
+//map to default no mapping / no activation
+for(i=0; i<=23;i++) 
+  { 
+     lisy_home_ss_special_lamp_map[i].no_of_maps = 0;
+  }
+
+//LAMPS construct the filename
+//Lamp ;Line of LED;LED Number;Comment
+//do we use a variant for testing?
+if (variant > 0)
+  sprintf(file_name,"%s%s_%02d.csv",LISYH_MAPPING_PATH,LISYH_SS_SPECIAL_LAMP_MAPPING_FILE,variant);
+else
+  sprintf(file_name,"%s%s.csv",LISYH_MAPPING_PATH,LISYH_SS_SPECIAL_LAMP_MAPPING_FILE);
+
+
+ fstream = fopen(file_name,"r");
+  if(fstream == NULL)
+  {
+      fprintf(stderr,"LISY_Home: opening %s failed, using defaults for special lamps\n",file_name);
+  }
+  else
+  {
+   first_line = 1;
+   fprintf(stderr,"LISY_Home: reading %s for special lamp mapping\n",file_name);
+   while( (line=fgets(buffer,sizeof(buffer),fstream))!=NULL)
+   {
+     if (first_line) { first_line=0; continue; } //skip first line (Header)
+     no = atoi(strtok(line, ";")); 	//lamp number
+     if ( no > 23 ) continue; //skip line if lamp number is out of range
+     lisy_home_ss_special_lamp_map[no].no_of_maps = lisy_home_ss_special_lamp_map[no].no_of_maps +1;
+     if ( lisy_home_ss_special_lamp_map[no].no_of_maps > 8 ) continue; //8 mappings in maximum
+     ledline = lisy_home_ss_special_lamp_map[no].mapped_to_line[lisy_home_ss_special_lamp_map[no].no_of_maps -1] = atoi(strtok(NULL, ";"));  //line of led
+     led = lisy_home_ss_special_lamp_map[no].mapped_to_led[lisy_home_ss_special_lamp_map[no].no_of_maps -1] = atoi(strtok(NULL, ";"));	  //led number in this line
+     //now read colorcodes
+     //sanity check
+     if (( ledline <=6 ) & ( led <= 48))
+     {
+	 led_rgbw_color[ledline][led].red = atoi(strtok(NULL, ";"));
+	 led_rgbw_color[ledline][led].green = atoi(strtok(NULL, ";"));
+	 led_rgbw_color[ledline][led].blue = atoi(strtok(NULL, ";"));
+	 led_rgbw_color[ledline][led].white = atoi(strtok(NULL, ";"));
+  //debug
+  if ( ls80dbg.bitv.lamps )
+  {
+    sprintf(debugbuf,"Map Lamp %d TO line:%d led:%d %d %d %d %d\n",no,ledline,led,led_rgbw_color[ledline][led].red,led_rgbw_color[ledline][led].green,led_rgbw_color[ledline][led].blue,led_rgbw_color[ledline][led].white);
+    lisy80_debug(debugbuf);
+  }
+     }
+   } //while
+   fclose(fstream);
+  }
+
+ return 0;
 }

@@ -44,6 +44,7 @@ typedef struct
 t_lisy_home_ss_lamp_map;
 
 void lisy_home_ss_lamp_set( int lamp, int action);
+void lisy_home_ss_special_lamp_set( int lamp, int action);
 
 //new starship, old one (tom&Jerry) to be adapted
 typedef struct
@@ -62,12 +63,13 @@ typedef struct
 }
 t_lisy_home_ss_special_coil_map;
 
-//starship special lamps ( Ball in Play Match )
+//starship special lamps ( Ball in Play, Match and others )
 typedef struct
 {
   unsigned char no_of_maps;
   unsigned char mapped_to_line[8];
   unsigned char mapped_to_led[8];
+  char comment[50];
 }
 t_lisy_home_ss_special_lamp_map;
 

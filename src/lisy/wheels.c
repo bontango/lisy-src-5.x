@@ -169,6 +169,12 @@ void wheel_score_reset( void )
    int i, check_for_all_zero;
    int is_zero[2][5] =  {{0,0,0,0,0},{0,0,0,0,0}};
 
+  if ( ls80dbg.bitv.coils )
+  {
+    sprintf(debugbuf,"Wheels: set wheels to zero START");
+    lisy80_debug(debugbuf);
+  }
+
    //set 5 digits
    //maximum 9 steps
    for(i=1; i<=10; i++)
@@ -211,7 +217,7 @@ void wheel_score_reset( void )
 
   if ( ls80dbg.bitv.coils )
   {
-    sprintf(debugbuf,"Wheels: set wheels to zero");
+    sprintf(debugbuf,"Wheels: set wheels to zero finished");
     lisy80_debug(debugbuf);
   }
 }
@@ -222,7 +228,10 @@ void wheels_show_int( int display, int digit, unsigned char dat)
    int i;
    int pos[2][5],pulses;
 
-   //ignore credit display for the moment
+   //status display
+   //digt 3&4 are credits
+   //digit 6 Endzahl
+   //digit 7 ball in Play
    if ( display == 0 )
 	{
 	 printf(" RTH wheels_show_int: display:%d digit:%d dat:%d\n",display,digit,dat); 	

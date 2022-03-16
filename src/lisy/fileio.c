@@ -1957,10 +1957,13 @@ else
 	 led_rgbw_color[ledline][led].green = atoi(strtok(NULL, ";"));
 	 led_rgbw_color[ledline][led].blue = atoi(strtok(NULL, ";"));
 	 led_rgbw_color[ledline][led].white = atoi(strtok(NULL, ";"));
+     //last field is comment
+     strcpy( lisy_home_ss_special_lamp_map[no].comment,strtok(NULL, ";"));
+
   //debug
   if ( ls80dbg.bitv.lamps )
   {
-    sprintf(debugbuf,"Map Lamp %d TO line:%d led:%d %d %d %d %d\n",no,ledline,led,led_rgbw_color[ledline][led].red,led_rgbw_color[ledline][led].green,led_rgbw_color[ledline][led].blue,led_rgbw_color[ledline][led].white);
+    sprintf(debugbuf,"Map Special Lamp %d TO line:%d led:%d %d %d %d %d\n",no,ledline,led,led_rgbw_color[ledline][led].red,led_rgbw_color[ledline][led].green,led_rgbw_color[ledline][led].blue,led_rgbw_color[ledline][led].white);
     lisy80_debug(debugbuf);
   }
      }
@@ -1970,3 +1973,152 @@ else
 
  return 0;
 }
+
+
+//handle dip definition file for current 'pin'
+//mode
+//mode == 0 -> set /lisy to rw; open file and prepare header line
+//mode == 1 -> append line to file
+//mode == 2 -> appemnd the line, close file; set /lisy to ro
+int lisy200_file_write_dipfile( int mode, char *line )
+{
+ static FILE *fstream;
+ char dip_file_name[80];
+
+
+// open / init mode
+if ( mode == 0 )
+{
+  //set mode to read - write
+  system("/bin/mount -o remount,rw /boot");
+  //construct the filename; 
+  sprintf(dip_file_name,"%s%s",LISY200_DIPS_PATH,LISY200_DIPS_FILE);
+  //try to open the file with game nr for writing
+  if ( ( fstream = fopen(dip_file_name,"w+")) == NULL ) return -1;
+  //send header line
+  fprintf(fstream,"Switch;ON_or_OFF;comment (Starship)\n");
+  //send first line
+  fprintf(fstream,"%s",line);
+  return 0;
+}
+
+//append mode
+if ( mode == 1 )
+{ 
+  fprintf(fstream,"%s",line);
+  return 0;
+}
+
+//close mode
+if ( mode == 2 )
+{
+  fprintf(fstream,"%s",line);
+  fclose(fstream);
+  system("/bin/mount -o remount,ro /boot");
+  return 0;
+}
+
+ return -2;
+}
+
+
+//read one dipswitch value with comment from definition file
+//dip_nr is 1..32
+// value is 0=off 1=on
+// comment is comment from file
+// *dip_setting_filename is filename with successfull read
+// if re_init is >0 the settings from the file are read again
+unsigned char lisy200_file_get_onedip( int dip_nr, char *dip_comment, char *dip_setting_filename, int re_init )
+{
+
+ int no,i,j,myswitch;
+ static int first_time = 1;
+ static unsigned char value[32];
+ static char comment[32][256];;
+ static char dip_file_name[80];
+
+ FILE *fstream;
+ char buffer[1024];
+ char *on_or_off;
+ char *line;
+ int first_line = 1;
+
+
+ //do we need to read the file again?
+ if ( re_init > 0) first_time = 1;
+
+//read dip switch settings only once
+ if (first_time)
+ {
+  //reset flag
+  first_time = 0;
+
+  //construct the filename; 
+  sprintf(dip_file_name,"%s%s",LISY200_DIPS_PATH,LISY200_DIPS_FILE);
+  //copy filename where we was successfull to give back to calling routine
+  strcpy( dip_setting_filename, dip_file_name);
+
+  //try to read the file with game nr
+  fstream = fopen(dip_file_name,"r");
+
+  //second try: to read the file with default
+  if(fstream == NULL)
+  {
+    //construct the new filename; using 'default'
+    sprintf(dip_file_name,"%sdefault%s",LISY35_DIPS_PATH,LISY35_DIPS_FILE);
+    //copy filename where we was successfull to give back to calling routine
+    strcpy( dip_setting_filename, dip_file_name);
+    fstream = fopen(dip_file_name,"r");
+   }//second try
+
+  //check if first or second try where successfull
+  //if it is still NULL both tries where not successfull
+  //we read dips on LISY35 board
+  if(fstream == NULL)
+      {
+	for( i=0; i<=3; i++)
+	{
+	 //read the whole switch
+	 myswitch = lisy35_file_get_mpudips( i, 0, dip_file_name );
+	   // the get dip on switch
+	   for( j=0; j<=7; j++)
+	   {
+	     value[i*8 + j] = CHECK_BIT( myswitch, j);
+             strcpy( comment[i*8 + j]," ---- comment ---- ");
+	   }
+ 	    //copy filename where we was successfull to give back to calling routine
+ 	    strcpy( dip_setting_filename, dip_file_name);
+        }
+      }
+  else
+  {
+   do
+   {
+     line=fgets(buffer,sizeof(buffer),fstream);
+     if (first_line) { first_line=0; continue; } //skip first line (Header)
+     //interpret the line
+     //first field is the number of the dip
+     no = atoi(strtok(line, ";"));
+     //second field is value ON or OFF
+     on_or_off = strdup(strtok(NULL, ";"));
+     if ( strcmp( on_or_off, "ON") == 0) value[no-1] = 1; else value[no-1] = 0;
+     //third field is comment
+     strcpy( comment[no-1],strtok(NULL, ";"));
+   }
+   while((line!=NULL) && (no!=32)); //make some basic reading checks
+
+   //any error?
+   if((line==NULL) || (no!=32)) return -1;
+
+   fclose(fstream);
+  } //if fstream!=NULL
+ } //done only first_time
+
+ //give back stored values (from first time)
+ strcpy(dip_comment,comment[dip_nr-1]);
+ //copy filename where we was successfull to give back to calling routine
+ strcpy( dip_setting_filename, dip_file_name);
+
+ return value[dip_nr-1];
+}
+

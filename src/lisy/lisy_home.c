@@ -252,6 +252,21 @@ void lisy_home_ss_lamp_set( int lamp, int action)
   } 
 }
 
+//do the led setting on starship
+//special lamps
+//aware of mapping
+void lisy_home_ss_special_lamp_set( int lamp, int action)
+{
+  int i;
+
+  //how many mappings?
+  for ( i=0; i<lisy_home_ss_special_lamp_map[lamp].no_of_maps; i++)
+  {
+   lisyh_led_set( lisy_home_ss_special_lamp_map[lamp].mapped_to_led[i], lisy_home_ss_special_lamp_map[lamp].mapped_to_line[i], action);
+  }
+}
+
+
 //map momentary solenoids to lisy home
 void lisy_home_ss_mom_coil_set( unsigned char value)
 {

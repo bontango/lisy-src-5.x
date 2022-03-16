@@ -85,6 +85,8 @@ int lisy35_file_get_mpudips( int switch_nr, int debug, char *dip_setting_filenam
 unsigned char lisy35_file_get_onedip( int dip_nr, char *dip_comment, char *dip_setting_filenamee, int re_init );
 int lisy35_file_write_dipfile( int mode, char *line );
 int  lisy35_file_get_soundopts(void);
+int lisy200_file_get_mpudips( int switch_nr, int debug, char *dip_setting_filename );
+unsigned char lisy200_file_get_onedip( int dip_nr, char *dip_comment, char *dip_setting_filenamee, int re_init );
 
 int lisymini_file_get_gamename(t_stru_lisymini_games_csv *lisymini_game);
 int lisyapc_file_get_gamename(t_stru_lisymini_games_csv *lisymini_game);

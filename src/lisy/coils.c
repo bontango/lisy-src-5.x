@@ -1144,7 +1144,6 @@ void lisyh_led_set( int led, int line, int action)
         mydata_coil.bitv.ACTION = action;
         mydata_coil.bitv.IS_CMD = 0;        //this is a coil setting
 
-
     //debug?
     if (  ls80dbg.bitv.lamps )
     {

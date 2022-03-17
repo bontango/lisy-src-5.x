@@ -23,6 +23,7 @@
 #include "sound.h"
 #include "lisy_home.h"
 #include "fadecandy.h"
+#include "wheels.h"
 #include "externals.h"
 #include "lisy.h"
 
@@ -324,12 +325,21 @@ void lisy_home_ss_send_led_colors( void)
 //vars for event handler actions
 unsigned char lisy_home_ss_lamp_2canplay_status = 0;
 unsigned char lisy_home_ss_digit_ballinplay_status = 80;
+unsigned char lisy35_flipper_disable_status = 1; //default flipper disbaled
+
+
+void lisy_home_ss_cont_sol_event( unsigned char cont_data )
+{
+  lisy35_flipper_disable_status =  CHECK_BIT( cont_data, 2);
+}
 
 void lisy_home_ss_display_event( int digit, int value)
 {
 	switch(digit)
 	{
-	 case LISY_HOME_DIGIT_BALLINPLAY: lisy_home_ss_digit_ballinplay_status = value; break;
+	 case LISY_HOME_DIGIT_BALLINPLAY: 
+		lisy_home_ss_digit_ballinplay_status = value;
+ 		break;
 	}
 }
 
@@ -342,16 +352,23 @@ void lisy_home_ss_lamp_event( int lamp, int action)
 //the Starship eventhandler
 void lisy_home_ss_event_handler( int id, int arg1, int arg2)
 {
+	static unsigned char old_ballinplay_status = 80;
+
     switch(id)
 	{
 	 case LISY_HOME_SS_EVENT_LAMP: lisy_home_ss_lamp_event( arg1, arg2); break;
-	 case LISY_HOME_SS_EVENT_DISPLAY: lisy_home_ss_display_event( arg1, arg2); break;
+	 case LISY_HOME_SS_EVENT_DISPLAY: 
+		lisy_home_ss_display_event( arg1, arg2);
+  		//wheels reset when ballinplay changes from 0 to 1
+  		if (( lisy_home_ss_digit_ballinplay_status == 1) & ( old_ballinplay_status == 0)) wheel_score_reset();
+  		old_ballinplay_status = lisy_home_ss_digit_ballinplay_status;
+		break;
+	 case LISY_HOME_SS_EVENT_CONT_SOL: lisy_home_ss_cont_sol_event( arg1 ); break;
 	}
 
   //2canplay lamp blocks credit switch when ball in play is 1 ( only 2 players on Starship)
-  if  (( lisy_home_ss_lamp_2canplay_status == 1)  & ( lisy_home_ss_digit_ballinplay_status = 1))
-	lisy_home_ss_ignore_credit = 1;
-  else
-	lisy_home_ss_ignore_credit = 0;
+  if  (( lisy_home_ss_lamp_2canplay_status == 1)  & ( lisy_home_ss_digit_ballinplay_status == 1))
+	lisy_home_ss_ignore_credit = 1; else lisy_home_ss_ignore_credit = 0;
+
 
 }

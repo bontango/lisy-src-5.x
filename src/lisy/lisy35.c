@@ -62,9 +62,6 @@ extern unsigned char lisy_home_ss_ignore_credit;
 //from coils.c
 extern unsigned char lisy35_bally_hw_check_finished;
 
-//store 'flipper disable status globally
-unsigned char lisy35_flipper_disable_status = 1;
-
 //internal for lisy35.c 
 //to have an delayed nvram write
 static unsigned char want_to_write_nvram = 0;
@@ -547,10 +544,6 @@ switch(index) //reverse order is handled by switch PIC
         break;
      case 33 ... 39: //Bally staus ( full player display )
         display35_show_int( 0, index-32, value);
-  	if ( lisy_hardware_revision == 200 )
-	  {
-		lisy_home_ss_event_handler( LISY_HOME_SS_EVENT_DISPLAY, index-32, value);
-	  }
         break;
      case 41 ... 47: //Bally player 5
         display35_show_int( 5, index-40, value);
@@ -1386,8 +1379,8 @@ void lisy35_solenoid_handler(unsigned char data, unsigned char soundselect)
   //new cont data?
   if (( old_cont_data != cont_data ) & ( lisy35_bally_hw_check_finished ==1))
   {
-    //store 'flipper disable status globally
-    lisy35_flipper_disable_status =  CHECK_BIT( cont_data, 2);
+    //running on Starship?
+    if ( lisy_hardware_revision == 200 ) lisy_home_ss_event_handler( LISY_HOME_SS_EVENT_CONT_SOL, cont_data, 0);
 
     //check for flipper disable
     if( CHECK_BIT( cont_data, 2) && !CHECK_BIT( old_cont_data, 2))
@@ -1401,13 +1394,6 @@ void lisy35_solenoid_handler(unsigned char data, unsigned char soundselect)
          //lisy80_debug("flipper disabled we do ASK for a nvram write");
          lisy80_debug("flipper disabled we do a nvram write");
         }
-    }
-
-    //check for flipper enable for Starship wheels reset at start of game
-    if ( lisy_hardware_revision == 200 )
-    {
-       if( !CHECK_BIT( cont_data, 2) && CHECK_BIT( old_cont_data, 2))
-	wheel_score_reset();
     }
 
     //debug?

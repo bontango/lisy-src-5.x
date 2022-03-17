@@ -234,7 +234,7 @@ void wheels_show_int( int display, int digit, unsigned char dat)
    //digit 7 ball in Play
    if ( display == 0 )
 	{
-	 printf(" RTH wheels_show_int: display:%d digit:%d dat:%d\n",display,digit,dat); 	
+	  lisy_home_ss_event_handler( LISY_HOME_SS_EVENT_DISPLAY, digit, dat);
 	 return;
 	}
 

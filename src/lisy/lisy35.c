@@ -57,7 +57,7 @@ unsigned char lisy35_okaegi_mod = 0;
 
 
 //from lisy.c set in lisy_home.c
-extern unsigned char lisy_home_ss_2canplay_lamp_status;
+extern unsigned char lisy_home_ss_ignore_credit;
 
 //from coils.c
 extern unsigned char lisy35_bally_hw_check_finished;
@@ -547,6 +547,10 @@ switch(index) //reverse order is handled by switch PIC
         break;
      case 33 ... 39: //Bally staus ( full player display )
         display35_show_int( 0, index-32, value);
+  	if ( lisy_hardware_revision == 200 )
+	  {
+		lisy_home_ss_event_handler( LISY_HOME_SS_EVENT_DISPLAY, index-32, value);
+	  }
         break;
      case 41 ... 47: //Bally player 5
         display35_show_int( 5, index-40, value);
@@ -645,14 +649,13 @@ if ( ( ls80dbg.bitv.basic ) & ( ret == 80))
 //and 2canplay lamp is ON
 if ( ( ret == 5 ) & (action == 1))
 {
-  if ( ( lisy_hardware_revision == 200 ) & ( lisy_home_ss_2canplay_lamp_status == 1))
+  if ( ( lisy_hardware_revision == 200 ) & ( lisy_home_ss_ignore_credit == 1))
   {
 	ret = 80;
 
-        //if ( ls80dbg.bitv.switches )
-        if ( 1 )
+        if ( ls80dbg.bitv.switches )
         {
-           lisy80_debug("LISY35_SWITCH_READER: 2canplay activ: credit ignored");
+           lisy80_debug("LISY35_SWITCH_READER: Ball one AND 2canplay activ: credit ignored");
         }
   }
 }

@@ -242,8 +242,8 @@ void lisy_home_ss_lamp_set( int lamp, int action)
 {
   int i;
 
-  //2canplay lamp blocks credit switch ( only 2 players on Starship)
-  if ( lamp == LISY_HOME_SS_LAMP_2CANPLAY) lisy_home_ss_2canplay_lamp_status = action;
+  //we may set other actions because of lamp status
+  lisy_home_ss_event_handler( LISY_HOME_SS_EVENT_LAMP, lamp, action);
 
   //how many mappings?
   for ( i=0; i<lisy_home_ss_lamp_map[lamp].no_of_maps; i++)
@@ -321,3 +321,37 @@ void lisy_home_ss_send_led_colors( void)
  }
 }
 
+//vars for event handler actions
+unsigned char lisy_home_ss_lamp_2canplay_status = 0;
+unsigned char lisy_home_ss_digit_ballinplay_status = 80;
+
+void lisy_home_ss_display_event( int digit, int value)
+{
+	switch(digit)
+	{
+	 case LISY_HOME_DIGIT_BALLINPLAY: lisy_home_ss_digit_ballinplay_status = value; break;
+	}
+}
+
+void lisy_home_ss_lamp_event( int lamp, int action)
+{
+  if ( lamp == LISY_HOME_SS_LAMP_2CANPLAY) lisy_home_ss_lamp_2canplay_status = action;
+}
+
+
+//the Starship eventhandler
+void lisy_home_ss_event_handler( int id, int arg1, int arg2)
+{
+    switch(id)
+	{
+	 case LISY_HOME_SS_EVENT_LAMP: lisy_home_ss_lamp_event( arg1, arg2); break;
+	 case LISY_HOME_SS_EVENT_DISPLAY: lisy_home_ss_display_event( arg1, arg2); break;
+	}
+
+  //2canplay lamp blocks credit switch when ball in play is 1 ( only 2 players on Starship)
+  if  (( lisy_home_ss_lamp_2canplay_status == 1)  & ( lisy_home_ss_digit_ballinplay_status = 1))
+	lisy_home_ss_ignore_credit = 1;
+  else
+	lisy_home_ss_ignore_credit = 0;
+
+}

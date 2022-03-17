@@ -76,6 +76,7 @@ t_lisy_home_ss_special_lamp_map;
 void lisy_home_ss_mom_coil_set( unsigned char value);
 void lisy_home_ss_cont_coil_set( unsigned char cont_data);
 void lisy_home_ss_send_led_colors( void);
+void lisy_home_ss_event_handler( int id, int arg1, int arg2);
 
 //the IDs for the event handler
 #define LISY_HOME_EVENT_INIT 0
@@ -85,8 +86,18 @@ void lisy_home_ss_send_led_colors( void);
 #define LISY_HOME_EVENT_LAMP 4
 #define LISY_HOME_EVENT_DISPLAY 5
 
+//the IDs for the Starship event handler
+#define LISY_HOME_SS_EVENT_LAMP 4
+#define LISY_HOME_SS_EVENT_DISPLAY 5
+
 //special lamps on Starship
 #define LISY_HOME_SS_LAMP_2CANPLAY 28
+
+//special digits on Starship
+#define LISY_HOME_DIGIT_CREDITS10 3
+#define LISY_HOME_DIGIT_CREDITS 4
+#define LISY_HOME_DIGIT_MATCH 6
+#define LISY_HOME_DIGIT_BALLINPLAY 7
 
 
 #endif  /* LISY_HOME_H */

@@ -48,7 +48,7 @@ t_lisy_home_ss_special_coil_map lisy_home_ss_special_coil_map[20];
 //colortable for leds Starship array with line & led
 t_rgbw_color led_rgbw_color[6][48];
 //Starship flags
-unsigned char lisy_home_ss_2canplay_lamp_status = 0;
+unsigned char lisy_home_ss_ignore_credit = 0;
 
 //global var for debugging
 //typedef is defined in hw_lib.h

@@ -87,12 +87,15 @@ void lisy_home_ss_event_handler( int id, int arg1, int arg2);
 #define LISY_HOME_EVENT_DISPLAY 5
 
 //the IDs for the Starship event handler
+#define LISY_HOME_SS_EVENT_INIT 0
 #define LISY_HOME_SS_EVENT_MOM_SOL 2
 #define LISY_HOME_SS_EVENT_CONT_SOL 3
 #define LISY_HOME_SS_EVENT_LAMP 4
 #define LISY_HOME_SS_EVENT_DISPLAY 5
 
 //special lamps on Starship
+#define LISY_HOME_SS_LAMP_PLAYER1UP 14
+#define LISY_HOME_SS_LAMP_PLAYER2UP 29
 #define LISY_HOME_SS_LAMP_2CANPLAY 28
 
 //special digits on Starship

@@ -243,6 +243,13 @@ void lisy_home_ss_lamp_set( int lamp, int action)
 {
   int i;
 
+ //debug?
+ if (  ls80dbg.bitv.lamps )
+    {
+     sprintf(debugbuf,"lisy_home_ss_lamp_set: lamp:%d action:%d\n",lamp,action);
+     lisy80_debug(debugbuf);
+    }//debug
+
   //we may set other actions because of lamp status
   lisy_home_ss_event_handler( LISY_HOME_SS_EVENT_LAMP, lamp, action);
 
@@ -259,6 +266,13 @@ void lisy_home_ss_lamp_set( int lamp, int action)
 void lisy_home_ss_special_lamp_set( int lamp, int action)
 {
   int i;
+
+ //debug?
+ if (  ls80dbg.bitv.lamps )
+    {
+     sprintf(debugbuf,"lisy_home_ss_special_lamp_set: lamp:%d action:%d\n",lamp,action);
+     lisy80_debug(debugbuf);
+    }//debug
 
   //how many mappings?
   for ( i=0; i<lisy_home_ss_special_lamp_map[lamp].no_of_maps; i++)
@@ -335,34 +349,73 @@ void lisy_home_ss_cont_sol_event( unsigned char cont_data )
 
 void lisy_home_ss_display_event( int digit, int value)
 {
+	static char old_ballinplay_status = -1;
+	static char old_match_status = -1;
+
 	switch(digit)
 	{
 	 case LISY_HOME_DIGIT_BALLINPLAY: 
+  		//wheels reset when ballinplay changes from 0 to 1
 		lisy_home_ss_digit_ballinplay_status = value;
+  		if (( lisy_home_ss_digit_ballinplay_status == 1) & ( old_ballinplay_status == 0)) wheel_score_reset();
+		//set/unset lamp for ball in play
+		if (( lisy_home_ss_digit_ballinplay_status > 0) & ( lisy_home_ss_digit_ballinplay_status <= 5))
+			 lisy_home_ss_special_lamp_set ( 9+lisy_home_ss_digit_ballinplay_status, 1); //Lamps 10...14
+		if (( old_ballinplay_status > 0)  & ( old_ballinplay_status <= 5 ))
+			 lisy_home_ss_special_lamp_set ( 9+old_ballinplay_status, 0); //Lamps 10...14
+		//store old value
+  		old_ballinplay_status = lisy_home_ss_digit_ballinplay_status;
+ 		break;
+	 case LISY_HOME_DIGIT_MATCH: 
+		//set/unset lamp for match 
+		if (( value >= 0) & ( value <= 9))
+			 lisy_home_ss_special_lamp_set ( value, 1); //Lamps 0...9
+		if (( old_match_status >= 0) & ( old_match_status <= 9))
+			 lisy_home_ss_special_lamp_set ( old_match_status, 0); //Lamps 0...9
+		old_match_status = value;
  		break;
 	}
 }
 
 void lisy_home_ss_lamp_event( int lamp, int action)
 {
-  if ( lamp == LISY_HOME_SS_LAMP_2CANPLAY) lisy_home_ss_lamp_2canplay_status = action;
+
+	switch(lamp)
+	{
+	 case LISY_HOME_SS_LAMP_2CANPLAY: 
+		 lisy_home_ss_lamp_2canplay_status = action;
+ 		break;
+	 case LISY_HOME_SS_LAMP_PLAYER1UP: 
+		 lisy_home_ss_special_lamp_set ( 15, action); 
+		 lisy_home_ss_special_lamp_set ( 16, action); 
+ 		break;
+	 case LISY_HOME_SS_LAMP_PLAYER2UP: 
+		 lisy_home_ss_special_lamp_set ( 17, action); 
+		 lisy_home_ss_special_lamp_set ( 18, action); 
+ 		break;
+	}
+}
+
+void lisy_home_ss_init_event(void)
+{
+ //activate special lamps for credit, drop targets 3000 and top rollover
+ lisy_home_ss_special_lamp_set ( 19, 1);
+ lisy_home_ss_special_lamp_set ( 20, 1);
+ lisy_home_ss_special_lamp_set ( 21, 1);
+
+
 }
 
 
 //the Starship eventhandler
 void lisy_home_ss_event_handler( int id, int arg1, int arg2)
 {
-	static unsigned char old_ballinplay_status = 80;
 
     switch(id)
 	{
+	 case LISY_HOME_SS_EVENT_INIT: lisy_home_ss_init_event( ); break;
 	 case LISY_HOME_SS_EVENT_LAMP: lisy_home_ss_lamp_event( arg1, arg2); break;
-	 case LISY_HOME_SS_EVENT_DISPLAY: 
-		lisy_home_ss_display_event( arg1, arg2);
-  		//wheels reset when ballinplay changes from 0 to 1
-  		if (( lisy_home_ss_digit_ballinplay_status == 1) & ( old_ballinplay_status == 0)) wheel_score_reset();
-  		old_ballinplay_status = lisy_home_ss_digit_ballinplay_status;
-		break;
+	 case LISY_HOME_SS_EVENT_DISPLAY: lisy_home_ss_display_event( arg1, arg2); break;
 	 case LISY_HOME_SS_EVENT_CONT_SOL: lisy_home_ss_cont_sol_event( arg1 ); break;
 	}
 

@@ -187,6 +187,9 @@ void lisy35_ss_init( void )
  //deactivate all special solenoids with a mapping
  lisyh_init_special_coils();
 
+ //activate GI
+ lisy_home_ss_event_handler(LISY_HOME_SS_EVENT_INIT,0,0);
+
  //collect latest informations and start the lisy logger
  lisy_env.has_soundcard = lisy35_has_soundcard;
  lisy_env.has_own_sounds = lisy35_has_own_sounds;

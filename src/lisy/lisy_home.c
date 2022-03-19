@@ -337,6 +337,7 @@ void lisy_home_ss_send_led_colors( void)
 }
 
 //vars for event handler actions
+unsigned char lisy_home_ss_lamp_1canplay_status = 0;
 unsigned char lisy_home_ss_lamp_2canplay_status = 0;
 unsigned char lisy_home_ss_digit_ballinplay_status = 80;
 unsigned char lisy35_flipper_disable_status = 1; //default flipper disbaled
@@ -382,14 +383,21 @@ void lisy_home_ss_lamp_event( int lamp, int action)
 
 	switch(lamp)
 	{
+	 case LISY_HOME_SS_LAMP_1CANPLAY: //set light on player1 to ON if 1canplay or 2canplay is ON
+		lisy_home_ss_lamp_1canplay_status = action;
+		if (( lisy_home_ss_lamp_1canplay_status == 1) | ( lisy_home_ss_lamp_2canplay_status ==1))
+		 {
+		 lisy_home_ss_special_lamp_set ( 15, 1); 
+		 lisy_home_ss_special_lamp_set ( 16, 1); 
+		 }
+		else
+		 {
+		 lisy_home_ss_special_lamp_set ( 15, 0); 
+		 lisy_home_ss_special_lamp_set ( 16, 0); 
+		 }
+ 		break;
 	 case LISY_HOME_SS_LAMP_2CANPLAY: 
 		 lisy_home_ss_lamp_2canplay_status = action;
- 		break;
-	 case LISY_HOME_SS_LAMP_PLAYER1UP: 
-		 lisy_home_ss_special_lamp_set ( 15, action); 
-		 lisy_home_ss_special_lamp_set ( 16, action); 
- 		break;
-	 case LISY_HOME_SS_LAMP_PLAYER2UP: 
 		 lisy_home_ss_special_lamp_set ( 17, action); 
 		 lisy_home_ss_special_lamp_set ( 18, action); 
  		break;

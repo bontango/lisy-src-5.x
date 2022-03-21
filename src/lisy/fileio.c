@@ -1579,7 +1579,9 @@ int  lisy_m_file_get_hwrules(void)
   return 0;
 }
 
-//read the csv file for lisy Home Starship lamp to LED mapping /lisy partition
+//read the csv file for lisy Home Starship 
+//lamp to LED mapping for lines 1..6
+//lamp to coil mapping for line 7
 //give -1 in case we had an error
 //fill structure 
 //reads also led colorcodes
@@ -1641,7 +1643,7 @@ else
      ledline = lisy_home_ss_lamp_map[no].mapped_to_line[lisy_home_ss_lamp_map[no].no_of_maps -1] = atoi(strtok(NULL, ";"));  //line of led
      led = lisy_home_ss_lamp_map[no].mapped_to_led[lisy_home_ss_lamp_map[no].no_of_maps -1] = atoi(strtok(NULL, ";"));	  //led number in this line
      //now read colorcodes
-     //sanity check
+     //sanity check (no color mapping for line 7 which is coil map)
      if (( ledline <=6 ) & ( led <= 48))
      {
 	 led_rgbw_color[ledline][led].red = atoi(strtok(NULL, ";"));
@@ -1901,6 +1903,8 @@ int lisy200_file_get_mpudips( int switch_nr, int debug, char *dip_setting_filena
 }
 
 //read the csv file for lisy Home Starship special lamp to LED mapping /lisy partition
+//lamp to LED mapping for lines 1..6
+//lamp to coil mapping for line 7
 //give -1 in case we had an error
 //fill structure 
 //reads also led colorcodes(init done in ss_lamp_mapping!)
@@ -1950,7 +1954,7 @@ else
      ledline = lisy_home_ss_special_lamp_map[no].mapped_to_line[lisy_home_ss_special_lamp_map[no].no_of_maps -1] = atoi(strtok(NULL, ";"));  //line of led
      led = lisy_home_ss_special_lamp_map[no].mapped_to_led[lisy_home_ss_special_lamp_map[no].no_of_maps -1] = atoi(strtok(NULL, ";"));	  //led number in this line
      //now read colorcodes
-     //sanity check
+     //sanity check (no color mapping for line 7 which is coil map)
      if (( ledline <=6 ) & ( led <= 48))
      {
 	 led_rgbw_color[ledline][led].red = atoi(strtok(NULL, ";"));

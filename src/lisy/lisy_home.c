@@ -256,7 +256,10 @@ void lisy_home_ss_lamp_set( int lamp, int action)
   //how many mappings?
   for ( i=0; i<lisy_home_ss_lamp_map[lamp].no_of_maps; i++)
   {
-   lisyh_led_set( lisy_home_ss_lamp_map[lamp].mapped_to_led[i], lisy_home_ss_lamp_map[lamp].mapped_to_line[i], action);
+   if(lisy_home_ss_lamp_map[lamp].mapped_to_line[i] == 7) //coil mapping
+      lisyh_coil_set( lisy_home_ss_lamp_map[lamp].mapped_to_led[i], action);
+   else if(lisy_home_ss_lamp_map[lamp].mapped_to_line[i] <= 6) //LED mapping
+      lisyh_led_set( lisy_home_ss_lamp_map[lamp].mapped_to_led[i], lisy_home_ss_lamp_map[lamp].mapped_to_line[i], action);
   } 
 }
 
@@ -277,7 +280,10 @@ void lisy_home_ss_special_lamp_set( int lamp, int action)
   //how many mappings?
   for ( i=0; i<lisy_home_ss_special_lamp_map[lamp].no_of_maps; i++)
   {
-   lisyh_led_set( lisy_home_ss_special_lamp_map[lamp].mapped_to_led[i], lisy_home_ss_special_lamp_map[lamp].mapped_to_line[i], action);
+   if(lisy_home_ss_special_lamp_map[lamp].mapped_to_line[i] == 7) //coil mapping
+      lisyh_coil_set( lisy_home_ss_special_lamp_map[lamp].mapped_to_led[i], action);
+   if(lisy_home_ss_special_lamp_map[lamp].mapped_to_line[i] <= 6) //LED mapping
+      lisyh_led_set( lisy_home_ss_special_lamp_map[lamp].mapped_to_led[i], lisy_home_ss_special_lamp_map[lamp].mapped_to_line[i], action);
   }
 }
 

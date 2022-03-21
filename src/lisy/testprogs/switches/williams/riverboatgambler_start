@@ -1,0 +1,14 @@
+echo prepare ball through
+./a.out 127.0.0.1 111
+./a.out 127.0.0.1 112
+./a.out 127.0.0.1 113
+#insert coin
+echo insert coin
+./a.out 127.0.0.1 104
+sleep 0.2
+./a.out 127.0.0.1 4
+sleep 2
+echo start game
+./a.out 127.0.0.1 103
+sleep 0.2
+./a.out 127.0.0.1 3

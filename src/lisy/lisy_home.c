@@ -356,11 +356,21 @@ void lisy_home_ss_cont_sol_event( unsigned char cont_data )
 
 void lisy_home_ss_display_event( int digit, int value)
 {
-	static char old_ballinplay_status = -1;
-	static char old_match_status = -1;
+	static int old_ballinplay_status = -1;
+	static int old_match_status = -1;
+	static int old_credit_status = -1;
 
 	switch(digit)
 	{
+	 //case LISY_HOME_DIGIT_CREDITS10: 
+ 	 //		break;
+	 case LISY_HOME_DIGIT_CREDITS: 
+		if ( old_credit_status < 0 )
+		{
+		   old_credit_status = value;
+		   wheel_score_credits_reset();
+		}
+ 		break;
 	 case LISY_HOME_DIGIT_BALLINPLAY: 
   		//wheels reset when ballinplay changes from 0 to 1
 		lisy_home_ss_digit_ballinplay_status = value;

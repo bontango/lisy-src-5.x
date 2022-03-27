@@ -37,12 +37,14 @@ extern unsigned char lisy35_flipper_disable_status;
 //internal to wheels
 int oldpos[2][5];
 int oldpos_credit[2];
-int oldpos_ball[2];
 #define WHEEL_STATE_OFF 0
 #define WHEEL_STATE_ON 1
 #define WHEEL_STATE_DELAY 2
 int wheel_pulses_needed[2][5] = { { 0,0,0,0,0},{ 0,0,0,0,0 } };
 int wheel_state[2][5] = { { 0,0,0,0,0},{ 0,0,0,0,0 } };
+int wheel_pulses_credits_needed = 0;
+int wheel_credits_state = 0;
+int wheel_score_credits_reset_done = 0;
 
 /*
 coil and switches
@@ -67,12 +69,63 @@ int digit2sol( int display, int digit)
 
 //this routine is called from lisy35_throttle
 //in order not to block game while pulsing (slow) wheels
-//RTH v1 with fix time ( expect to be called each 4 ms )
+//RTH v1 with fix time ( expect to be called each 5 ms )
 void wheels_refresh(void)
 {
 	int i,j,state,coil;
-	static int pulse_time[2][5];
-	static int delay_time[2][5];
+	static int pulse_time[2][5],pulse_time_credit;
+	static int delay_time[2][5],delay_time_credit;
+	static int credit_coil;
+
+
+  //check status wheel
+  //no activation before score reset is done
+  if ( wheel_score_credits_reset_done == 1) 
+    {
+        switch(wheel_credits_state)
+        {
+         case WHEEL_STATE_OFF: //wheel is ready for pulse
+                if ( wheel_pulses_credits_needed != 0) //do we need to pulse?
+                 {
+   			// wheel_pulse_reset(10); credit UP
+   			// wheel_pulse_reset(11); credit down
+		  if ( wheel_pulses_credits_needed < 0) //step down?
+			{
+			 credit_coil=11;
+			 wheel_pulses_credits_needed += 1;
+			}
+		  else   //step up
+			{
+			 credit_coil=10;
+			 wheel_pulses_credits_needed -= 1;
+			}
+                  lisyh_coil_set(  lisy_home_ss_special_coil_map[credit_coil].mapped_to_coil, 1);
+                  pulse_time_credit = lisy_home_ss_special_coil_map[credit_coil].pulsetime;
+                  delay_time_credit = lisy_home_ss_special_coil_map[credit_coil].delay;
+                  wheel_credits_state = WHEEL_STATE_ON;
+                 }
+                break;
+         case WHEEL_STATE_ON: //wheel is active, count down pulstime
+                pulse_time_credit -= 5; //5ms per call
+                if ( pulse_time_credit <= 0 ) //pulse time expired?
+                 {
+                  //yes deactivate sol and change state to DELAY
+                  lisyh_coil_set(  lisy_home_ss_special_coil_map[credit_coil].mapped_to_coil, 0);
+                  wheel_credits_state = WHEEL_STATE_DELAY;
+                 }
+                break;
+
+         case WHEEL_STATE_DELAY: //wheel inactive but in delay state ( we need to prevent too fast pulsing)
+                delay_time_credit -= 5; //5ms per call
+                if ( delay_time_credit <= 0 ) //delay_time time expired?
+                 {
+                  //yes change state to DELAY
+                  wheel_credits_state = WHEEL_STATE_OFF;
+                 }
+                break;
+
+        }//state
+    } //reset done
 
   //check all 10 wheels
   for(i=0; i<=1; i++) {
@@ -162,6 +215,46 @@ void wheel_pulse ( int coil )
  }
 }
 
+//set credit wheels to 'zero' position
+void wheel_score_credits_reset( void )
+{
+  int i;
+
+  if ( ls80dbg.bitv.coils )
+  {
+    sprintf(debugbuf,"Wheels: set CREDIT wheels to zero Boot");
+    lisy80_debug(debugbuf);
+  }
+
+   //reset credit display
+   // swMatrixLISY35[7],4) SW#53 credit >0
+   // swMatrixLISY35[7],5) SW#54 credit <=24
+   // wheel_pulse_reset(10); credit UP
+   // wheel_pulse_reset(11); credit down
+  
+   //maximum 25 steps
+   for(i=1; i<=26; i++)
+   {
+     lisy35_switchmatrix_update(); //update internal matrix to detect zero switch
+     //pulse down until '0' switch is closed
+     if ( !CHECK_BIT(swMatrixLISY35[7],4)) wheel_pulse_reset(11); else break;
+   }
+
+   //reset postion as well
+   for(i=0; i<2; i++) oldpos_credit[i] = 0;
+
+  //set flag 
+  wheel_score_credits_reset_done = 1;
+
+  if ( ls80dbg.bitv.coils )
+  {
+    sprintf(debugbuf,"Wheels: set CREDIT wheels to zero finished");
+    lisy80_debug(debugbuf);
+  }
+
+}
+
+
 //set all wheels to 'zero' position
 void wheel_score_reset( void )
 {
@@ -220,6 +313,7 @@ void wheel_score_reset( void )
     sprintf(debugbuf,"Wheels: set wheels to zero finished");
     lisy80_debug(debugbuf);
   }
+
 }
 
 void wheels_show_int( int display, int digit, unsigned char dat)
@@ -227,6 +321,7 @@ void wheels_show_int( int display, int digit, unsigned char dat)
 
    int i;
    int pos[2][5],pulses;
+   int oldcredits, newcredits;
 
    //status display
    //digt 3&4 are credits
@@ -234,9 +329,34 @@ void wheels_show_int( int display, int digit, unsigned char dat)
    //digit 7 ball in Play
    if ( display == 0 )
 	{
+          if ( dat > 9 ) return; //ignore spaces
+
 	  lisy_home_ss_event_handler( LISY_HOME_SS_EVENT_DISPLAY, digit, dat);
+
+	  oldcredits = 10 * oldpos_credit[1] + oldpos_credit[0];
+	  //store credit positions
+	  if (digit == 3) oldpos_credit[1] = dat; //tens
+	  else if (digit == 4) oldpos_credit[0] = dat; //one
+	  else return;
+	  //caculate new
+	  newcredits = 10 * oldpos_credit[1] + oldpos_credit[0];
+
+	  pulses = newcredits - oldcredits;
+
+	//set local var for pulses needed
+	//will becoming active with wheel_refresh via lisy35_throtle
+	wheel_pulses_credits_needed += pulses;
+
+	//if ( ls80dbg.bitv.displays )
+	if ( 1 )
+  	{
+	  sprintf(debugbuf,"wheels_show_int: Status display old:%d new:%d (%d pulses needed)\n",oldcredits,newcredits, pulses);
+    	  lisy80_debug(debugbuf);
+  	}
+
+
 	 return;
-	}
+     }//status display
 
    //ignore 'spaces' , display >1 and digit >6
    if ( dat > 9 ) return;
@@ -257,8 +377,7 @@ void wheels_show_int( int display, int digit, unsigned char dat)
         if (  pulses > 0 )  pulses = abs( 10 -  pulses);
         if (  pulses < 0 )  pulses = abs( pulses);
 
-	//if ( ls80dbg.bitv.displays )
-        if ( 1 )
+	if ( ls80dbg.bitv.displays )
   	{
 	  sprintf(debugbuf,"wheels_show_int: display:%d digit:%d dat:%d (old dat%d   %d pulses needed)\n",display,digit,dat, oldpos[display][digit],pulses);
     	  lisy80_debug(debugbuf);

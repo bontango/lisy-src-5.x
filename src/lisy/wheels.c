@@ -45,6 +45,7 @@ int wheel_state[2][5] = { { 0,0,0,0,0},{ 0,0,0,0,0 } };
 int wheel_pulses_credits_needed = 0;
 int wheel_credits_state = 0;
 int wheel_score_credits_reset_done = 0;
+int wheel_score_reset_done = 0;
 
 /*
 coil and switches
@@ -80,7 +81,7 @@ void wheels_refresh(void)
 
   //check status wheel
   //no activation before score reset is done
-  if ( wheel_score_credits_reset_done == 1) 
+  if ( wheel_score_credits_reset_done == 1)
     {
         switch(wheel_credits_state)
         {
@@ -91,6 +92,7 @@ void wheels_refresh(void)
    			// wheel_pulse_reset(11); credit down
 		  if ( wheel_pulses_credits_needed < 0) //step down?
 			{
+			 if ( wheel_score_reset_done == 0) break; //step don only after wheel score reset
 			 credit_coil=11;
 			 wheel_pulses_credits_needed += 1;
 			}
@@ -195,7 +197,7 @@ void wheel_pulse_reset ( int coil )
   lisyh_coil_set(  lisy_home_ss_special_coil_map[coil].mapped_to_coil, 1);
   delay (lisy_home_ss_special_coil_map[coil].pulsetime); // milliseconds delay from wiringpi library
   lisyh_coil_set(  lisy_home_ss_special_coil_map[coil].mapped_to_coil, 0);
-  //delay (lisy_home_ss_special_coil_map[coil].delay); // milliseconds delay from wiringpi library
+  delay (lisy_home_ss_special_coil_map[coil].delay); // milliseconds delay from wiringpi library
  }
 }
 
@@ -236,8 +238,8 @@ void wheel_score_credits_reset( void )
    for(i=1; i<=26; i++)
    {
      lisy35_switchmatrix_update(); //update internal matrix to detect zero switch
-     //pulse down until '0' switch is closed
-     if ( !CHECK_BIT(swMatrixLISY35[7],4)) wheel_pulse_reset(11); else break;
+     //pulse down until '0' switch is open
+     if ( CHECK_BIT(swMatrixLISY35[7],4)) wheel_pulse_reset(11); else break;
    }
 
    //reset postion as well
@@ -308,6 +310,9 @@ void wheel_score_reset( void )
    for(i=0; i<5; i++) oldpos[0][i] = 0;
    for(i=0; i<5; i++) oldpos[1][i] = 0;
 
+  //set flag 
+  wheel_score_reset_done = 1;
+
   if ( ls80dbg.bitv.coils )
   {
     sprintf(debugbuf,"Wheels: set wheels to zero finished");
@@ -321,7 +326,8 @@ void wheels_show_int( int display, int digit, unsigned char dat)
 
    int i;
    int pos[2][5],pulses;
-   int oldcredits, newcredits;
+   int newcredits;
+   static int oldcredits = 0;
 
    //status display
    //digt 3&4 are credits
@@ -333,27 +339,31 @@ void wheels_show_int( int display, int digit, unsigned char dat)
 
 	  lisy_home_ss_event_handler( LISY_HOME_SS_EVENT_DISPLAY, digit, dat);
 
-	  oldcredits = 10 * oldpos_credit[1] + oldpos_credit[0];
-	  //store credit positions
-	  if (digit == 3) oldpos_credit[1] = dat; //tens
-	  else if (digit == 4) oldpos_credit[0] = dat; //one
-	  else return;
-	  //caculate new
-	  newcredits = 10 * oldpos_credit[1] + oldpos_credit[0];
 
-	  pulses = newcredits - oldcredits;
-
-	//set local var for pulses needed
-	//will becoming active with wheel_refresh via lisy35_throtle
-	wheel_pulses_credits_needed += pulses;
-
-	//if ( ls80dbg.bitv.displays )
-	if ( 1 )
-  	{
-	  sprintf(debugbuf,"wheels_show_int: Status display old:%d new:%d (%d pulses needed)\n",oldcredits,newcredits, pulses);
-    	  lisy80_debug(debugbuf);
-  	}
-
+	  if (digit == 3) //tens changed
+	  {
+		oldpos_credit[1] = dat; //tens no update oldcredits  here
+printf("RTH tens %d\n",dat);
+	  }
+	  else if (digit == 4)
+	  {
+printf("RTH one %d\n",dat);
+		 oldpos_credit[0] = dat; //one
+		 //do update
+	  	 //caculate new
+		 newcredits = 10 * oldpos_credit[1] + oldpos_credit[0];
+	  	 pulses = newcredits - oldcredits;
+		 //set local var for pulses needed
+		 //will becoming active with wheel_refresh via lisy35_throtle
+		 wheel_pulses_credits_needed += pulses;
+		 if ( ls80dbg.bitv.coils )
+  		 {
+	  	  sprintf(debugbuf,"wheels_show_int: Status display old:%d new:%d (%d pulses needed)\n",oldcredits,newcredits, pulses);
+    	  	  lisy80_debug(debugbuf);
+  		 }
+		 //store for next update
+		 oldcredits = newcredits;
+	  }
 
 	 return;
      }//status display

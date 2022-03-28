@@ -36,7 +36,7 @@ extern unsigned char lisy35_flipper_disable_status;
 
 //internal to wheels
 int oldpos[2][5];
-int oldpos_credit[2];
+int oldpos_credit[2] = { 0,0};
 #define WHEEL_STATE_OFF 0
 #define WHEEL_STATE_ON 1
 #define WHEEL_STATE_DELAY 2
@@ -197,6 +197,18 @@ void wheel_pulse_reset ( int coil )
   lisyh_coil_set(  lisy_home_ss_special_coil_map[coil].mapped_to_coil, 1);
   delay (lisy_home_ss_special_coil_map[coil].pulsetime); // milliseconds delay from wiringpi library
   lisyh_coil_set(  lisy_home_ss_special_coil_map[coil].mapped_to_coil, 0);
+  //delay (lisy_home_ss_special_coil_map[coil].delay); // milliseconds delay from wiringpi library
+ }
+}
+
+//same with delay
+void wheel_pulse_reset_wdelay ( int coil )
+{
+ if ( lisy_home_ss_special_coil_map[coil].mapped_to_coil != 0)
+ {
+  lisyh_coil_set(  lisy_home_ss_special_coil_map[coil].mapped_to_coil, 1);
+  delay (lisy_home_ss_special_coil_map[coil].pulsetime); // milliseconds delay from wiringpi library
+  lisyh_coil_set(  lisy_home_ss_special_coil_map[coil].mapped_to_coil, 0);
   delay (lisy_home_ss_special_coil_map[coil].delay); // milliseconds delay from wiringpi library
  }
 }
@@ -239,11 +251,11 @@ void wheel_score_credits_reset( void )
    {
      lisy35_switchmatrix_update(); //update internal matrix to detect zero switch
      //pulse down until '0' switch is open
-     if ( CHECK_BIT(swMatrixLISY35[7],4)) wheel_pulse_reset(11); else break;
+     if ( CHECK_BIT(swMatrixLISY35[7],4)) wheel_pulse_reset_wdelay(11); else break;
    }
 
    //reset postion as well
-   for(i=0; i<2; i++) oldpos_credit[i] = 0;
+   //for(i=0; i<2; i++) oldpos_credit[i] = 0;
 
   //set flag 
   wheel_score_credits_reset_done = 1;
@@ -302,8 +314,8 @@ void wheel_score_reset( void )
      //extra delay if not all wheels are at zero
      check_for_all_zero = is_zero[0][0]+is_zero[0][1]+is_zero[0][2]+is_zero[0][3]+is_zero[0][4];
      check_for_all_zero = check_for_all_zero+is_zero[1][0]+is_zero[1][1]+is_zero[1][2]+is_zero[1][3]+is_zero[1][4];
-   //RTH needed?
-   //  if (check_for_all_zero != 10) delay(300);
+     //we need a delay if all but one wheel is at zero
+     if (check_for_all_zero == 9) delay(300);
         }
 
    //reset postion as well

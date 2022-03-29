@@ -422,11 +422,8 @@ void lisy_home_ss_lamp_event( int lamp, int action)
 
 void lisy_home_ss_init_event(void)
 {
- //activate special lamps for credit, drop targets 3000 and top rollover
- lisy_home_ss_special_lamp_set ( 19, 1);
- lisy_home_ss_special_lamp_set ( 20, 1);
- lisy_home_ss_special_lamp_set ( 21, 1);
-
+ //activate GI lamps for credit, drop targets 3000 and top rollover
+ //lisy_file_set_home_ss_GI();
 
 }
 

@@ -2126,3 +2126,61 @@ unsigned char lisy200_file_get_onedip( int dip_nr, char *dip_comment, char *dip_
  return value[dip_nr-1];
 }
 
+//read the csv file for lisy Home Starship GI assigment
+//and set all lamps referreed there to ON
+void  lisy_file_set_home_ss_GI(int variant)
+{
+ char buffer[1024];
+ char *line;
+ char file_name[80];
+ int lamp;
+ int is_special;
+ int first_line = 1;
+ FILE *fstream;
+
+//GI construct the filename
+//Lamp ;normal(0) or special(1)
+//do we use a variant for testing?
+if (variant > 0)
+  sprintf(file_name,"%s%s_%02d.csv",LISYH_MAPPING_PATH,LISYH_SS_GI_LIST,variant);
+else
+  sprintf(file_name,"%s%s.csv",LISYH_MAPPING_PATH,LISYH_SS_GI_LIST);
+
+
+ fstream = fopen(file_name,"r");
+  if(fstream == NULL)
+  {
+      fprintf(stderr,"LISY_Home: opening %s failed, no GI activation\n",file_name);
+  }
+  else
+  {
+   first_line = 1;
+   fprintf(stderr,"LISY_Home: reading %s for GI activation\n",file_name);
+   while( (line=fgets(buffer,sizeof(buffer),fstream))!=NULL)
+   {
+     if (first_line) { first_line=0; continue; } //skip first line (Header)
+     lamp = atoi(strtok(line, ";")); 	//lamp number
+     is_special = atoi(strtok(line, ";")); 	//special(1) or normal(0) lamp
+     //activation
+     if(is_special)
+	lisy_home_ss_special_lamp_set(lamp,1);
+     else
+	lisy_home_ss_lamp_set(lamp,1);
+
+
+     //debug
+     if ( ls80dbg.bitv.lamps )
+     {
+        if(is_special)
+          sprintf(debugbuf,"activate special lamp %d for GI\n",lamp);
+        else
+          sprintf(debugbuf,"activate normal lamp %d for GI\n",lamp);
+       lisy80_debug(debugbuf);
+     }
+   } //while
+  }//if fstream not NULL
+
+   fclose(fstream);
+
+}
+

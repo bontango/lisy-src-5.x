@@ -188,6 +188,9 @@ void lisy35_ss_init( void )
  lisyh_init_special_coils();
 
  //activate GI
+ lisy_file_set_home_ss_GI(dip_value);
+
+ //init ss event handler
  lisy_home_ss_event_handler(LISY_HOME_SS_EVENT_INIT,0,0);
 
  //collect latest informations and start the lisy logger

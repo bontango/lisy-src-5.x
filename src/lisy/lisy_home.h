@@ -73,6 +73,15 @@ typedef struct
 }
 t_lisy_home_ss_special_lamp_map;
 
+//starship GI
+typedef struct
+{
+  unsigned char line;
+  unsigned char led;
+}
+t_lisy_home_ss_GI_leds;
+
+
 void lisy_home_ss_mom_coil_set( unsigned char value);
 void lisy_home_ss_cont_coil_set( unsigned char cont_data);
 void lisy_home_ss_send_led_colors( void);

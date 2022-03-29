@@ -2127,19 +2127,26 @@ unsigned char lisy200_file_get_onedip( int dip_nr, char *dip_comment, char *dip_
 }
 
 //read the csv file for lisy Home Starship GI assigment
-//and set all lamps referreed there to ON
-void  lisy_file_set_home_ss_GI(int variant)
+//set color and fill structure
+int  lisy_file_get_home_ss_GI(int variant)
 {
  char buffer[1024];
  char *line;
  char file_name[80];
- int lamp;
- int is_special;
+ int no;
  int first_line = 1;
  FILE *fstream;
+ int i,dum;
+ unsigned char ledline,led;
 
-//GI construct the filename
-//Lamp ;normal(0) or special(1)
+//default no activation (line=0)
+for(i=0; i<=127;i++)
+  {
+     lisy_home_ss_GI_leds[i].line = 0;
+  }
+
+//LAMPS construct the filename
+//Lamp ;Line of LED;LED Number;Comment
 //do we use a variant for testing?
 if (variant > 0)
   sprintf(file_name,"%s%s_%02d.csv",LISYH_MAPPING_PATH,LISYH_SS_GI_LIST,variant);
@@ -2150,37 +2157,41 @@ else
  fstream = fopen(file_name,"r");
   if(fstream == NULL)
   {
-      fprintf(stderr,"LISY_Home: opening %s failed, no GI activation\n",file_name);
+      fprintf(stderr,"LISY_Home: opening %s failed, no GI lamps?\n",file_name);
   }
   else
   {
    first_line = 1;
-   fprintf(stderr,"LISY_Home: reading %s for GI activation\n",file_name);
+   fprintf(stderr,"LISY_Home: reading %s for GI list\n",file_name);
    while( (line=fgets(buffer,sizeof(buffer),fstream))!=NULL)
    {
-     if (first_line) { first_line=0; continue; } //skip first line (Header)
-     lamp = atoi(strtok(line, ";")); 	//lamp number
-     is_special = atoi(strtok(line, ";")); 	//special(1) or normal(0) lamp
-     //activation
-     if(is_special)
-	lisy_home_ss_special_lamp_set(lamp,1);
-     else
-	lisy_home_ss_lamp_set(lamp,1);
+     if (first_line) { no=0; first_line=0; continue; } //skip first line (Header)
+     ledline = atoi(strtok(line, ";"));  //line of led
+     led = atoi(strtok(NULL, ";"));	  //led number in this line
+     //store it
+     lisy_home_ss_GI_leds[no].line = ledline;
+     lisy_home_ss_GI_leds[no].led = led;
+printf("RTH %d %d\n",ledline,led);
 
-
-     //debug
-     if ( ls80dbg.bitv.lamps )
+     if ( no < 126 ) no++; //sanity check
+     //now read colorcodes
+     //sanity check (no color mapping for line 7 which is coil map)
+     if (( ledline <=6 ) & ( led <= 48))
      {
-        if(is_special)
-          sprintf(debugbuf,"activate special lamp %d for GI\n",lamp);
-        else
-          sprintf(debugbuf,"activate normal lamp %d for GI\n",lamp);
-       lisy80_debug(debugbuf);
+	 led_rgbw_color[ledline][led].red = atoi(strtok(NULL, ";"));
+	 led_rgbw_color[ledline][led].green = atoi(strtok(NULL, ";"));
+	 led_rgbw_color[ledline][led].blue = atoi(strtok(NULL, ";"));
+	 led_rgbw_color[ledline][led].white = atoi(strtok(NULL, ";"));
+  	//debug
+  	if ( ls80dbg.bitv.lamps )
+  	{
+    	sprintf(debugbuf," line:%d led:%d %d %d %d %d is GI\n",ledline,led,led_rgbw_color[ledline][led].red,led_rgbw_color[ledline][led].green,led_rgbw_color[ledline][led].blue,led_rgbw_color[ledline][led].white);
+    	lisy80_debug(debugbuf);
+  	}
      }
    } //while
-  }//if fstream not NULL
-
    fclose(fstream);
-
+  }
+ 
+ return 0;
 }
-

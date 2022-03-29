@@ -108,7 +108,7 @@ int  lisy_file_get_home_ss_special_lamp_mappings(int variant);
 //lisy200 (Starship) stuff
 int lisy200_file_get_mpudips( int switch_nr, int debug, char *dip_setting_filename );
 unsigned char lisy200_file_get_onedip( int dip_nr, char *dip_comment, char *dip_setting_filenamee, int re_init );
-void  lisy_file_set_home_ss_GI(int variant);
+int  lisy_file_get_home_ss_GI(int variant);
 
 /* LISY80 stuff */
 #define LISY80_GAMES_CSV "/boot/lisy/lisy80/cfg/lisy80games.csv"

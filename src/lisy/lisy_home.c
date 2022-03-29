@@ -422,9 +422,21 @@ void lisy_home_ss_lamp_event( int lamp, int action)
 
 void lisy_home_ss_init_event(void)
 {
- //activate GI lamps for credit, drop targets 3000 and top rollover
- //lisy_file_set_home_ss_GI();
+ int i;
 
+ //activate GI lamps for credit, drop targets 3000 and top rollover
+ for(i=0; i<=127; i++) 
+  {
+	if ( lisy_home_ss_GI_leds[i].line != 0) 
+	{
+	 lisyh_led_set( lisy_home_ss_GI_leds[i].led, lisy_home_ss_GI_leds[i].line, 1);
+         if ( ls80dbg.bitv.lamps )
+          {
+          sprintf(debugbuf,"activate GI led:%d line:%d",lisy_home_ss_GI_leds[i].led, lisy_home_ss_GI_leds[i].line);
+          lisy80_debug(debugbuf);
+          }
+	}
+  } //for
 }
 
 

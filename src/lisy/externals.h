@@ -27,6 +27,7 @@ extern t_lisy_home_ss_lamp_map lisy_home_ss_lamp_map[60];
 extern t_lisy_home_ss_coil_map lisy_home_ss_coil_map[20];
 extern t_lisy_home_ss_special_coil_map lisy_home_ss_special_coil_map[20];
 extern t_lisy_home_ss_special_lamp_map lisy_home_ss_special_lamp_map[24];
+extern t_lisy_home_ss_GI_leds lisy_home_ss_GI_leds[128];
 extern t_rgbw_color led_rgbw_color[6][48];
 //Starship flags
 extern unsigned char lisy_home_ss_ignore_credit;

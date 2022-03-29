@@ -178,6 +178,8 @@ void lisy35_ss_init( void )
  lisy_file_get_home_ss_coil_mappings(dip_value);
  lisy_file_get_home_ss_special_coil_mappings(dip_value);
  lisy_file_get_home_ss_special_lamp_mappings(dip_value);
+// get LEDs and colourcodes for GI
+ lisy_file_get_home_ss_GI(dip_value);
  //select solenoidboard by default
  lisyh_coil_select_solenoid_driver();
  lisyh_coil_select_led_driver_line(1);
@@ -187,10 +189,7 @@ void lisy35_ss_init( void )
  //deactivate all special solenoids with a mapping
  lisyh_init_special_coils();
 
- //activate GI
- lisy_file_set_home_ss_GI(dip_value);
-
- //init ss event handler
+ //init ss event handler (will activate i.e. GI)
  lisy_home_ss_event_handler(LISY_HOME_SS_EVENT_INIT,0,0);
 
  //collect latest informations and start the lisy logger

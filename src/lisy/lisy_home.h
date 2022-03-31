@@ -107,6 +107,7 @@ void lisy_home_ss_event_handler( int id, int arg1, int arg2);
 #define LISY_HOME_SS_LAMP_PLAYER2UP 29
 #define LISY_HOME_SS_LAMP_1CANPLAY 13
 #define LISY_HOME_SS_LAMP_2CANPLAY 28
+#define LISY_HOME_SS_LAMP_GAMEOVER 42
 
 //special digits on Starship
 #define LISY_HOME_DIGIT_CREDITS10 3

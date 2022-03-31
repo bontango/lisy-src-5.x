@@ -347,6 +347,7 @@ unsigned char lisy_home_ss_lamp_1canplay_status = 0;
 unsigned char lisy_home_ss_lamp_2canplay_status = 0;
 unsigned char lisy_home_ss_digit_ballinplay_status = 80;
 unsigned char lisy35_flipper_disable_status = 1; //default flipper disbaled
+unsigned char want_wheel_score_credits_reset = 0;
 
 
 void lisy_home_ss_cont_sol_event( unsigned char cont_data )
@@ -368,7 +369,7 @@ void lisy_home_ss_display_event( int digit, int value)
 		if ( old_credit_status < 0 )
 		{
 		   old_credit_status = value;
-		   wheel_score_credits_reset();
+		   want_wheel_score_credits_reset = 1;
 		}
  		break;
 	 case LISY_HOME_DIGIT_BALLINPLAY: 
@@ -416,6 +417,13 @@ void lisy_home_ss_lamp_event( int lamp, int action)
 		 lisy_home_ss_lamp_2canplay_status = action;
 		 lisy_home_ss_special_lamp_set ( 17, action); 
 		 lisy_home_ss_special_lamp_set ( 18, action); 
+ 		break;
+	 case LISY_HOME_SS_LAMP_GAMEOVER: //make sure reset credit wheel does not block solenoid off by waiting for game over
+		 if (( action = 1) &( want_wheel_score_credits_reset = 1))
+			{
+			 want_wheel_score_credits_reset = 0;
+		   	 wheel_score_credits_reset();
+			}
  		break;
 	}
 }

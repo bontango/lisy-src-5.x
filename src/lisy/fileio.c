@@ -2171,8 +2171,6 @@ else
      //store it
      lisy_home_ss_GI_leds[no].line = ledline;
      lisy_home_ss_GI_leds[no].led = led;
-printf("RTH %d %d\n",ledline,led);
-
      if ( no < 126 ) no++; //sanity check
      //now read colorcodes
      //sanity check (no color mapping for line 7 which is coil map)

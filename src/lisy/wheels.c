@@ -355,11 +355,9 @@ void wheels_show_int( int display, int digit, unsigned char dat)
 	  if (digit == 3) //tens changed
 	  {
 		oldpos_credit[1] = dat; //tens no update oldcredits  here
-printf("RTH tens %d\n",dat);
 	  }
 	  else if (digit == 4)
 	  {
-printf("RTH one %d\n",dat);
 		 oldpos_credit[0] = dat; //one
 		 //do update
 	  	 //caculate new

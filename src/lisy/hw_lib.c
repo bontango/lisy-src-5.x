@@ -294,6 +294,7 @@ void lisy_hwlib_init( void )
  //******************
  // PIC 1 - Displays
  //******************
+ if (ls80dbg.bitv.basic) lisy80_debug("display PIC init start");
  if ((fd_disp_pic = open( I2C_DEVICE,O_RDWR)) < 0)
         lisy80_error(2);
  // Set the port options and set the address of the device we wish to speak to
@@ -332,6 +333,7 @@ void lisy_hwlib_init( void )
  //******************
  // PIC 3 - Coils
  //******************
+ if (ls80dbg.bitv.basic) lisy80_debug("coil PIC init start");
  if ((fd_coil_pic = open( I2C_DEVICE,O_RDWR)) < 0)
         lisy80_error(4);
  // Set the port options and set the address of the device we wish to speak to
@@ -367,6 +369,7 @@ void lisy_hwlib_init( void )
  //******************
  // PIC 2 - Switches
  //******************
+ if (ls80dbg.bitv.basic) lisy80_debug("switch PIC init start");
  // - no I2C but 4bit paralell mode 
  //set direction and initial value of Pi GPIO ports
  //
@@ -560,12 +563,25 @@ void lisy80_sound_set(int sound)
   lisy80_coil_sound_set(sound);
 }
 
+
 // identiyf if buffer on switch PIC is ready
-//resturn 1 if yes, 0 otherwise
 //which is the status of the GPIO connected to Switch PIC
+//resturn 1 if yes, otherwise goto error after 5 seconds
 int lisy80_switch_readycheck( void )
-{
-  return( digitalRead(LISY80_BUF_READY) );
+{ 
+  int count = 0;
+  
+  while( digitalRead(LISY80_BUF_READY) == 0)
+  {
+    delay(10); //10 ms delay from wiringpi
+    count++;
+    if ( count > 500) //wait 5 seconds in max
+	{
+	   lisy80_error(12);
+	}
+  }
+
+  return 1;
 }
 
 //init the pic for the switches

@@ -563,15 +563,20 @@ void lisy80_sound_set(int sound)
   lisy80_coil_sound_set(sound);
 }
 
-
 // identiyf if buffer on switch PIC is ready
+//resturn 1 if yes, 0 otherwise
 //which is the status of the GPIO connected to Switch PIC
-//resturn 1 if yes, otherwise goto error after 5 seconds
 int lisy80_switch_readycheck( void )
+{
+  return( digitalRead(LISY80_BUF_READY) );
+}
+
+// wait for specific buffer state (0 or 1) with timeout
+void lisy80_switch_waitfor_state( unsigned char state )
 { 
   int count = 0;
   
-  while( digitalRead(LISY80_BUF_READY) == 0)
+  while( digitalRead(LISY80_BUF_READY) != state)
   {
     delay(10); //10 ms delay from wiringpi
     count++;
@@ -580,8 +585,6 @@ int lisy80_switch_readycheck( void )
 	   lisy80_error(12);
 	}
   }
-
-  return 1;
 }
 
 //init the pic for the switches
@@ -612,10 +615,10 @@ int lisy80_switch_pic_init(void)
  //wait a bit
  delay(SW_PIC_INIT_DEL_IN_MS); //ms delay from wiringpi
  //now the first two "switch values" should be version
- while (lisy80_switch_readycheck() == 0); //wait for switch pic to be ready
+ lisy80_switch_waitfor_state(1); //wait for switch pic to be ready
  version = lisy80_read_byte_sw_pic();
  delay(SW_PIC_INIT_DEL_IN_MS); //ms delay from wiringpi
- while (lisy80_switch_readycheck() == 0); //wait for switch pic to be ready
+ lisy80_switch_waitfor_state(1); //wait for switch pic to be ready
  subversion = lisy80_read_byte_sw_pic();
 
  // if subversion is >2 or version >3 
@@ -624,7 +627,7 @@ int lisy80_switch_pic_init(void)
  if ( (subversion > 2) || ( version > 3 ) )
   {
     delay(SW_PIC_INIT_DEL_IN_MS); //ms delay from wiringpi
-    while (lisy80_switch_readycheck() == 0); //wait for switch pic to be ready
+    lisy80_switch_waitfor_state(1); //wait for switch pic to be ready
     K1_debug_values = lisy80_read_byte_sw_pic();
   }
  else K1_debug_values = 0; //no debug for subversion <3!
@@ -633,7 +636,7 @@ int lisy80_switch_pic_init(void)
  if ( (subversion > 6)  || ( version > 3 ) )
   {
     delay(SW_PIC_INIT_DEL_IN_MS); //ms delay from wiringpi
-    while (lisy80_switch_readycheck() == 0); //wait for switch pic to be ready
+    lisy80_switch_waitfor_state(1); //wait for switch pic to be ready
     dip_missing_values = lisy80_read_byte_sw_pic();
   }
 
@@ -658,7 +661,7 @@ union both {
     } myswitch;
 
  //now wait for signal from PIC that data is ready
- while ( digitalRead(LISY80_BUF_READY) != 1);
+ lisy80_switch_waitfor_state(1);
 
  //once signal is there store first 4 bits in myswitch
  if ( lisy_hardware_revision == 311)
@@ -680,7 +683,7 @@ union both {
  digitalWrite (LISY80_ACK_FROM_PI, 1);
 
  //and wait for signal from PIC that second part of data is ready
- while ( digitalRead(LISY80_BUF_READY) != 0);
+ lisy80_switch_waitfor_state(0);
 
  //once signal is there store second 4 bits in myswitch
  if ( lisy_hardware_revision == 311)
@@ -1080,10 +1083,10 @@ void lisy35_switch_pic_init(unsigned char variant)
  delay(SW_PIC_INIT_DEL_IN_MS); //ms delay from wiringpi
 
  //now the first two "switch values" should be version
- while (lisy80_switch_readycheck() == 0); //wait for switch pic to be ready
+ lisy80_switch_waitfor_state(1); //wait for switch pic to be ready
  version = lisy80_read_byte_sw_pic();
  delay(SW_PIC_INIT_DEL_IN_MS); //ms delay from wiringpi
- while (lisy80_switch_readycheck() == 0); //wait for switch pic to be ready
+ lisy80_switch_waitfor_state(1); //wait for switch pic to be ready
  subversion = lisy80_read_byte_sw_pic();
  // if subversion is >2 or version > 3
  //third byte is value of pin connector of switch pic
@@ -1091,7 +1094,7 @@ void lisy35_switch_pic_init(unsigned char variant)
  if ( (subversion > 2) || ( version > 3 ) )
   {
     delay(SW_PIC_INIT_DEL_IN_MS); //ms delay from wiringpi
-    while (lisy80_switch_readycheck() == 0); //wait for switch pic to be ready
+    lisy80_switch_waitfor_state(1); //wait for switch pic to be ready
     dum = lisy80_read_byte_sw_pic();
   }
  // if subversion is >6 or version >3  fourth byte is part of dipsswitch S1
@@ -1099,7 +1102,7 @@ void lisy35_switch_pic_init(unsigned char variant)
   if ( (subversion > 6)  || ( version > 3 ) )
   {
     delay(SW_PIC_INIT_DEL_IN_MS); //ms delay from wiringpi
-    while (lisy80_switch_readycheck() == 0); //wait for switch pic to be ready
+    lisy80_switch_waitfor_state(1); //wait for switch pic to be ready
     dum = lisy80_read_byte_sw_pic();
   }
 

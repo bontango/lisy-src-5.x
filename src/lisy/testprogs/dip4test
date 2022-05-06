@@ -1,0 +1,6 @@
+#!/bin/bash
+S2setting=`/usr/local/bin/getdip4andS2`
+returnval=$?
+
+echo ret is $returnval setting is $S2setting
+

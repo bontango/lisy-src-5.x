@@ -2193,3 +2193,48 @@ else
  
  return 0;
 }
+
+
+//read the csv file for sound opts on /lisy partition
+//give -1 in case we had an error
+//fill structure stru_lisy35_sound_csv
+int  lisy200_file_get_soundopts(void)
+{
+
+ char buffer[1024];
+ char *line;
+ char *str;
+ char sound_file_name[80];
+ int sound_no,i;
+ int first_line = 1;
+ FILE *fstream;
+
+ //construct the filename;
+ sprintf(sound_file_name,"%s%s",LISY200_SOUND_PATH,LISY200_SOUND_FILE);
+
+ fstream = fopen(sound_file_name,"r");
+   if(fstream == NULL)
+   {
+      fprintf(stderr,"\n LISY200: opening %s failed ",sound_file_name);
+      return -1;
+   }
+
+ //init soundnumber to 0
+ for ( i=0; i<=255; i++) lisy35_sound_stru[i].soundnumber = 0;
+   while( (line=fgets(buffer,sizeof(buffer),fstream))!=NULL)
+   {
+     if (first_line) { first_line=0; continue; } //skip first line (Header)
+     str = strdup(strtok(line, ";"));   //sound number in hex
+     sound_no = strtol(str, NULL, 16); // to be converted
+     //sound_no = atoi(strtok(line, ";")); 	//sound number
+     lisy35_sound_stru[sound_no].soundnumber = sound_no;   // != 0 if mapped
+     lisy35_sound_stru[sound_no].path = strdup(strtok(NULL, ";"));	//path to soundfile
+     lisy35_sound_stru[sound_no].name = strdup(strtok(NULL, ";"));	//name of soundfile
+     lisy35_sound_stru[sound_no].option = atoi(strtok(NULL, ";"));	//option
+     lisy35_sound_stru[sound_no].comment = strdup(strtok(NULL, ";"));	//comment
+   } //while
+   fclose(fstream);
+
+  return 0;
+}
+

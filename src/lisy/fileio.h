@@ -109,6 +109,7 @@ int  lisy_file_get_home_ss_special_lamp_mappings(int variant);
 int lisy200_file_get_mpudips( int switch_nr, int debug, char *dip_setting_filename );
 unsigned char lisy200_file_get_onedip( int dip_nr, char *dip_comment, char *dip_setting_filenamee, int re_init );
 int  lisy_file_get_home_ss_GI(int variant);
+int  lisy200_file_get_soundopts(void);
 
 /* LISY80 stuff */
 #define LISY80_GAMES_CSV "/boot/lisy/lisy80/cfg/lisy80games.csv"
@@ -170,6 +171,8 @@ int  lisy_file_get_home_ss_GI(int variant);
 /* LISY200 (Starship) stuff */
 #define LISY200_DIPS_PATH "/boot/lisy/lisyH/dips/"
 #define LISY200_DIPS_FILE "Starship_dips.csv"
+#define LISY200_SOUND_PATH "/boot/lisy/lisyH/sounds/StarShip/"
+#define LISY200_SOUND_FILE "sounds.csv"
 
 #endif  // _FILEIO_H
 

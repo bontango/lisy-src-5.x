@@ -373,9 +373,14 @@ void lisy_home_ss_display_event( int digit, int value)
 		}
  		break;
 	 case LISY_HOME_DIGIT_BALLINPLAY: 
-  		//wheels reset when ballinplay changes from 0 to 1
+  		//wheels reset when ballinplay changes from 0 to 1 ( start of game )
 		lisy_home_ss_digit_ballinplay_status = value;
-  		if (( lisy_home_ss_digit_ballinplay_status == 1) & ( old_ballinplay_status == 0)) wheel_score_reset();
+  		if (( lisy_home_ss_digit_ballinplay_status == 1) & ( old_ballinplay_status == 0))
+		 {
+		   wheel_score_reset();
+		   //play start sound
+		   lisy35_play_wav(0x41); //fix setting RTH
+		 }
 		//set/unset lamp for ball in play
 		if (( lisy_home_ss_digit_ballinplay_status > 0) & ( lisy_home_ss_digit_ballinplay_status <= 5))
 			 lisy_home_ss_special_lamp_set ( 9+lisy_home_ss_digit_ballinplay_status, 1); //Lamps 10...14

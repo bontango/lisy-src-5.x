@@ -132,7 +132,7 @@ void lisy35_ss_init( void )
  if ( lisy35_has_own_sounds )
  {
   //first try to read sound opts, as we NEED them
-  if ( lisy35_file_get_soundopts() < 0 )
+  if ( lisy200_file_get_soundopts() < 0 )
    {
      fprintf(stderr,"no sound opts file; sound init failed, sound emulation disabled\n");
      lisy35_has_own_sounds = 0;
@@ -163,7 +163,11 @@ void lisy35_ss_init( void )
      lisy35_has_own_sounds = 0;
    }
  else
+   {
    fprintf(stderr,"info: sound init done\n");
+   //play intro
+   lisy35_play_wav(0x40); //fix soundnumber for intro RTH
+   }
  }
 
  //Starship mspecific inits

@@ -377,9 +377,10 @@ void lisy_home_ss_display_event( int digit, int value)
 		lisy_home_ss_digit_ballinplay_status = value;
   		if (( lisy_home_ss_digit_ballinplay_status == 1) & ( old_ballinplay_status == 0))
 		 {
-		   wheel_score_reset();
 		   //play start sound
-		   lisy35_play_wav(0x41); //fix setting RTH
+		   lisy35_play_wav(0xA1); //fix setting RTH
+		   //reset displays
+		   wheel_score_reset();
 		 }
 		//set/unset lamp for ball in play
 		if (( lisy_home_ss_digit_ballinplay_status > 0) & ( lisy_home_ss_digit_ballinplay_status <= 5))
@@ -452,6 +453,15 @@ void lisy_home_ss_init_event(void)
   } //for
 }
 
+//switch event, map sounds
+void lisy_home_ss_cont_switch_event( int switch_no, int action)
+{ 
+ if ( ( lisy_env.has_own_sounds ) & ( lisy35_flipper_disable_status == 0) )
+ {
+   if (action == 1)lisy35_play_wav(switch_no); 
+ }
+}
+
 
 //the Starship eventhandler
 void lisy_home_ss_event_handler( int id, int arg1, int arg2)
@@ -463,6 +473,7 @@ void lisy_home_ss_event_handler( int id, int arg1, int arg2)
 	 case LISY_HOME_SS_EVENT_LAMP: lisy_home_ss_lamp_event( arg1, arg2); break;
 	 case LISY_HOME_SS_EVENT_DISPLAY: lisy_home_ss_display_event( arg1, arg2); break;
 	 case LISY_HOME_SS_EVENT_CONT_SOL: lisy_home_ss_cont_sol_event( arg1 ); break;
+	 case LISY_HOME_SS_EVENT_SWITCH: lisy_home_ss_cont_switch_event( arg1, arg2 ); break;
 	}
 
   //2canplay lamp blocks credit switch when ball in play is 1 ( only 2 players on Starship)

@@ -40,6 +40,7 @@ int g_lisy35_throttle_val = 5000;
 //global var for sound options
 unsigned char lisy35_has_soundcard = 0;  //there is a pHat soundcard installed
 unsigned char lisy35_has_own_sounds = 0;  //play own sounds rather then usinig piname sound emulation
+unsigned char StarShip_has_own_sounds = 0;  //play StarShip sounds
 t_stru_lisy35_sounds_csv lisy35_sound_stru[256];
 
 //internal switch Matrix for system1, we need 7 elements
@@ -166,11 +167,19 @@ void lisy35_ss_init( void )
    {
    fprintf(stderr,"info: sound init done\n");
    //play intro
-   lisy35_play_wav(0x40); //fix soundnumber for intro RTH
+   lisy35_play_wav(0xA0); //fix soundnumber for intro RTH
    }
  }
 
  //Starship mspecific inits
+
+//RTH temp switch to Starship sounds
+if ( lisy35_has_own_sounds )
+{
+  lisy35_has_own_sounds = 0;
+  StarShip_has_own_sounds = 1;
+}
+
  //read the dip setting
  dip_value = display_get_ss_dipsw_value();
  fprintf(stderr,"Info: Starship: Dip setting is %d\n",dip_value);
@@ -198,7 +207,7 @@ void lisy35_ss_init( void )
 
  //collect latest informations and start the lisy logger
  lisy_env.has_soundcard = lisy35_has_soundcard;
- lisy_env.has_own_sounds = lisy35_has_own_sounds;
+ lisy_env.has_own_sounds = StarShip_has_own_sounds;
  lisy_logger();
 
 }
@@ -646,6 +655,9 @@ if ( ( ls80dbg.bitv.basic ) & ( ret == 80))
      --ret;
    }
  }
+
+ //running on Starship?
+ if ( lisy_hardware_revision == 200 ) lisy_home_ss_event_handler( LISY_HOME_SS_EVENT_SWITCH, ret, action);
 
 //ignore credit switch if we running on Starship
 //and 2canplay lamp is ON

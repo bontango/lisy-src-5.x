@@ -65,6 +65,7 @@ typedef struct
   char *comment;   //comment
   int how_many_versions;  // to handle sounds with alternative versions, contains 1 to 4 (not read from csv file)
   int last_version_played;   // last version of the sound played, 0 = never played (not read from csv file)
+  int trigger;  //StarShip : play when closed(1) or open(0)
 } t_stru_lisy35_sounds_csv;
 
 int lisy80_file_get_gamename(t_stru_lisy80_games_csv *lisy80_game);

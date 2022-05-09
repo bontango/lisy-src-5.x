@@ -147,9 +147,10 @@ void lisy35_ss_init( void )
      for(i=1; i<=255; i++)
      {
        if ( lisy35_sound_stru[i].soundnumber != 0 )
-       fprintf(stderr,"Sound[%d]: %s %s %d \n",i,lisy35_sound_stru[i].path,
+       fprintf(stderr,"Sound[%d]: %s %s opt:%d trigger:%d \n",i,lisy35_sound_stru[i].path,
                         lisy35_sound_stru[i].name,
-                        lisy35_sound_stru[i].option);
+                        lisy35_sound_stru[i].option,
+			lisy35_sound_stru[i].trigger);
      }
     }
    }
@@ -158,7 +159,7 @@ void lisy35_ss_init( void )
  if ( lisy35_has_own_sounds )
  {
   //now open soundcard, and init soundstream
-  if ( lisy35_sound_stream_init() < 0 )
+  if ( StarShip_sound_stream_init() < 0 )
    {
      fprintf(stderr,"sound init failed, sound emulation disabled\n");
      lisy35_has_own_sounds = 0;
@@ -167,7 +168,7 @@ void lisy35_ss_init( void )
    {
    fprintf(stderr,"info: sound init done\n");
    //play intro
-   lisy35_play_wav(0xA0); //fix soundnumber for intro RTH
+   lisy35_play_wav(200); //fix soundnumber for intro RTH
    }
  }
 
@@ -656,8 +657,9 @@ if ( ( ls80dbg.bitv.basic ) & ( ret == 80))
    }
  }
 
- //running on Starship?
- if ( lisy_hardware_revision == 200 ) lisy_home_ss_event_handler( LISY_HOME_SS_EVENT_SWITCH, ret, action);
+ //running on Starship? switchnumber has to be increased
+ if (( lisy_hardware_revision == 200 ) & ( ret != 80 ))
+		 lisy_home_ss_event_handler( LISY_HOME_SS_EVENT_SWITCH, ret+1, action);
 
 //ignore credit switch if we running on Starship
 //and 2canplay lamp is ON

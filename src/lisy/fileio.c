@@ -2224,13 +2224,14 @@ int  lisy200_file_get_soundopts(void)
    while( (line=fgets(buffer,sizeof(buffer),fstream))!=NULL)
    {
      if (first_line) { first_line=0; continue; } //skip first line (Header)
-     str = strdup(strtok(line, ";"));   //sound number in hex
-     sound_no = strtol(str, NULL, 16); // to be converted
-     //sound_no = atoi(strtok(line, ";")); 	//sound number
+     //str = strdup(strtok(line, ";"));   //sound number in hex
+     //sound_no = strtol(str, NULL, 16); // to be converted
+     sound_no = atoi(strtok(line, ";")); 	//sound number
      lisy35_sound_stru[sound_no].soundnumber = sound_no;   // != 0 if mapped
      lisy35_sound_stru[sound_no].path = strdup(strtok(NULL, ";"));	//path to soundfile
      lisy35_sound_stru[sound_no].name = strdup(strtok(NULL, ";"));	//name of soundfile
      lisy35_sound_stru[sound_no].option = atoi(strtok(NULL, ";"));	//option
+     lisy35_sound_stru[sound_no].trigger = atoi(strtok(NULL, ";"));	//trigger
      lisy35_sound_stru[sound_no].comment = strdup(strtok(NULL, ";"));	//comment
    } //while
    fclose(fstream);

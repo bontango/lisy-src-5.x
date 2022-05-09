@@ -378,7 +378,7 @@ void lisy_home_ss_display_event( int digit, int value)
   		if (( lisy_home_ss_digit_ballinplay_status == 1) & ( old_ballinplay_status == 0))
 		 {
 		   //play start sound
-		   lisy35_play_wav(0xA1); //fix setting RTH
+		   lisy35_play_wav(201); //fix setting RTH
 		   //reset displays
 		   wheel_score_reset();
 		 }
@@ -458,7 +458,7 @@ void lisy_home_ss_cont_switch_event( int switch_no, int action)
 { 
  if ( ( lisy_env.has_own_sounds ) & ( lisy35_flipper_disable_status == 0) )
  {
-   if (action == 1)lisy35_play_wav(switch_no); 
+   if (action == lisy35_sound_stru[switch_no].trigger) lisy35_play_wav(switch_no); 
  }
 }
 

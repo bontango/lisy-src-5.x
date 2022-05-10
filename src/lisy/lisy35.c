@@ -147,10 +147,12 @@ void lisy35_ss_init( void )
      for(i=1; i<=255; i++)
      {
        if ( lisy35_sound_stru[i].soundnumber != 0 )
-       fprintf(stderr,"Sound[%d]: %s %s opt:%d trigger:%d \n",i,lisy35_sound_stru[i].path,
+       fprintf(stderr,"Sound[%d]: %s %s opt:%d trigger:%d wait:%d delay%d \n",i,lisy35_sound_stru[i].path,
                         lisy35_sound_stru[i].name,
                         lisy35_sound_stru[i].option,
-			lisy35_sound_stru[i].trigger);
+			lisy35_sound_stru[i].trigger,
+			lisy35_sound_stru[i].wait,
+			lisy35_sound_stru[i].delay);
      }
     }
    }

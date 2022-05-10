@@ -10,6 +10,7 @@
 #include <string.h>
 #include <time.h>
 #include <sys/time.h>
+#include <unistd.h>
 #include <wiringPi.h>
 #include "lisy35.h"
 #include "fileio.h"
@@ -458,7 +459,22 @@ void lisy_home_ss_cont_switch_event( int switch_no, int action)
 { 
  if ( ( lisy_env.has_own_sounds ) & ( lisy35_flipper_disable_status == 0) )
  {
-   if (action == lisy35_sound_stru[switch_no].trigger) lisy35_play_wav(switch_no); 
+   if (action == lisy35_sound_stru[switch_no].trigger) 
+	{ 
+	  lisy35_play_wav(switch_no); 
+	  
+	  //wait for sound finished?
+	  if ( lisy35_sound_stru[switch_no].wait != 0)
+		{
+		  while (Mix_Playing(switch_no) != 0);
+		}
+
+	  //delay after sound start?
+	  if ( lisy35_sound_stru[switch_no].delay != 0)
+		{
+		  sleep(lisy35_sound_stru[switch_no].delay);
+		}
+	}
  }
 }
 

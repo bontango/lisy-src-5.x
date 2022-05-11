@@ -2233,6 +2233,7 @@ int  lisy200_file_get_soundopts(void)
      lisy35_sound_stru[sound_no].option = atoi(strtok(NULL, ";"));	//option
      lisy35_sound_stru[sound_no].trigger = atoi(strtok(NULL, ";"));	//trigger
      lisy35_sound_stru[sound_no].wait = atoi(strtok(NULL, ";"));	//wait or not
+     lisy35_sound_stru[sound_no].onlyactiveingame = atoi(strtok(NULL, ";"));	//trigger
      lisy35_sound_stru[sound_no].delay = atoi(strtok(NULL, ";"));	//delay after sound start
      lisy35_sound_stru[sound_no].comment = strdup(strtok(NULL, ";"));	//comment
    } //while

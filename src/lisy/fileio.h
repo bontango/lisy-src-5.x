@@ -68,6 +68,7 @@ typedef struct
   int trigger;  //StarShip : play when closed(1) or open(0)
   int wait; //StarShip: wait until sound is finished
   int delay; //StarShip: delay after sound start ( block pinmame)
+  int onlyactiveingame; //StarShip: some switches (e.g.coins) need always to produce sound
 } t_stru_lisy35_sounds_csv;
 
 int lisy80_file_get_gamename(t_stru_lisy80_games_csv *lisy80_game);

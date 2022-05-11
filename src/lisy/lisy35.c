@@ -169,8 +169,6 @@ void lisy35_ss_init( void )
  else
    {
    fprintf(stderr,"info: sound init done\n");
-   //play intro
-   lisy35_play_wav(200); //fix soundnumber for intro RTH
    }
  }
 
@@ -205,7 +203,7 @@ if ( lisy35_has_own_sounds )
  //deactivate all special solenoids with a mapping
  lisyh_init_special_coils();
 
- //init ss event handler (will activate i.e. GI)
+ //init ss event handler (will activate i.e. GI, bootsound )
  lisy_home_ss_event_handler(LISY_HOME_SS_EVENT_INIT,0,0);
 
  //collect latest informations and start the lisy logger

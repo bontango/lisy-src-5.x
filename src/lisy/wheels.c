@@ -234,6 +234,18 @@ void wheel_score_credits_reset( void )
 {
   int i;
 
+  //only do it once
+  if ( wheel_score_credits_reset_done == 1 )
+   {
+    if ( ls80dbg.bitv.coils )
+    {
+      sprintf(debugbuf,"Wheels: CREDIT wheels already reset at Boot, ignored");
+      lisy80_debug(debugbuf);
+    }
+
+     return;
+   }
+
   if ( ls80dbg.bitv.coils )
   {
     sprintf(debugbuf,"Wheels: set CREDIT wheels to zero Boot");

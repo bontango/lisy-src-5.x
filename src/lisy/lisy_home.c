@@ -462,7 +462,7 @@ void lisy_home_ss_cont_switch_event( int switch_no, int action)
    if (action == lisy35_sound_stru[switch_no].trigger) 
 	{ 
 	  lisy35_play_wav(switch_no); 
-	  
+  	  
 	  //wait for sound finished?
 	  if ( lisy35_sound_stru[switch_no].wait != 0)
 		{

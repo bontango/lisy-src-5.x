@@ -114,7 +114,7 @@ int lisy35_sound_stream_init(void)
             return(-1);
         }
 
-  // allocate 31 mixing channels
+  // allocate 256 mixing channels
   Mix_AllocateChannels(256);
 
   // set volume to lisy_volume for all allocated channels
@@ -181,7 +181,7 @@ int lisy1_sound_stream_init(void)
  int i,ret;
  //RTH soundfile names for LISY1 are fixed for now
  char lisy1_wav_file_name[6][80]= { "10.wav", "100.wav", "1000.wav", "gameover.wav", "tilt.wav" };
- char wav_file_name[80];
+ char wav_file_name[255];
 
 
  /* Initialize only SDL Audio on default device */
@@ -288,6 +288,48 @@ void lisy80_play_wav(int sound_no)
 
  extended = 0; //set back flag
 }
+
+/*
+ * Starship new sound request
+ * load on demand
+ */
+void StarShip_play_wav(int sound_no)
+{
+
+	char sound_file_name[312];
+
+  if ( lisy35_sound_stru[sound_no].soundnumber != 0)
+    {
+     //load soundfile if not alredy done	
+     if ( lisy35_sound_stru[sound_no].preload == 0)
+     {
+        //construct the filename, according to options red from csv file
+        sprintf(sound_file_name,"/boot/%s/%s",lisy35_sound_stru[sound_no].path,lisy35_sound_stru[sound_no].name);
+        lisysound[sound_no] = Mix_LoadWAV(sound_file_name);
+        if(lisysound[sound_no] == NULL)
+            {
+                fprintf(stderr,"Unable to dynamic load Sound file: %s - %s\n",sound_file_name, Mix_GetError());
+		return;
+              }
+        else //load successfull
+	  {
+             lisy35_sound_stru[sound_no].preload = 1;
+             lisy35_sound_stru[sound_no].how_many_versions = 1;
+             lisy35_sound_stru[sound_no].last_version_played = 0;
+             if ( ls80dbg.bitv.sound )
+                 {
+                      sprintf(debugbuf,"dynamic loaded file:%s as sound number %d\n",sound_file_name,sound_no);
+                      lisy80_debug(debugbuf);
+                  }
+	   }
+     }
+
+	//now play loaded file
+         lisy35_play_wav(sound_no);
+    }
+}
+
+
 
 /*
  * LISY35 new sound request
@@ -680,7 +722,7 @@ int StarShip_sound_stream_init(void)
     //try to preload all sounds
 	for( i=1; i<=255; i++)
 	{
-		if ( lisy35_sound_stru[i].soundnumber != 0)
+		if ( ( lisy35_sound_stru[i].soundnumber != 0) & ( lisy35_sound_stru[i].preload == 1)) 
 		{
 			//construct the filename, according to options red from csv file
 			sprintf(sound_file_name,"/boot/%s/%s",lisy35_sound_stru[i].path,lisy35_sound_stru[i].name);

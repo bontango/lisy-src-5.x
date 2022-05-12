@@ -47,72 +47,7 @@ ret = lisy_file_get_home_mappings();
     return -1;
   }
 
-//we init sound, may be separate later
-
-/*
-RTH new, sound_init done by lisy80 with dip2 == ON
-
-  int audio_rate = 44100;                 //Frequency of audio playback
-  Uint16 audio_format = MIX_DEFAULT_FORMAT;       //Format of the audio we're playing
-  int audio_channels = 2;                 //2 channels = stereo
-  int audio_buffers = 2048;               //Size of the audio buffers in memory
-
- int i,ret;
- //RTH soundfile names for LISY_HOME are fixed for now
- char lisyH_wav_file_name[6][80]= { "Introducing.wav", "Drain.wav" };
- char wav_file_name[80];
-
-
-
- // Initialize only SDL Audio on default device 
-    if(SDL_Init(SDL_INIT_AUDIO) < 0)
-    {
-        return -1;
-    }
-
- //Initialize SDL_mixer with our chosen audio settings
-  if(Mix_OpenAudio(audio_rate, audio_format, audio_channels, audio_buffers) != 0) {
-            printf("Unable to initialize audio: %s\n", Mix_GetError());
-            return(-1);
-        }
-
-  // allocate only 5 mixing channels now system1
-  Mix_AllocateChannels(5);
-
-  // set volume to lisy_volume for all allocated channels
-  Mix_Volume(-1, lisy_volume);
-  if ( ls80dbg.bitv.sound )
-  {
-    sprintf(debugbuf,"Info: lisy_volume is %d",lisy_volume);
-    lisy80_debug(debugbuf);
-  }
-
- //try to preload all sounds
- ret=-1; //we set it to 0 if at least one wav file could be loaded
- for ( i=1; i<=2; i++)
- {
-  sprintf(wav_file_name,"%s/%s",LISYH_SOUND_PATH,lisyH_wav_file_name[i-1]);
-  lisy_H_sound[i] = Mix_LoadWAV(wav_file_name);
-  if(lisy_H_sound[i] == NULL) {
-         fprintf(stderr,"Unable to load WAV file: %s\n", Mix_GetError());
-        }
-  else {
-       ret=0;
-       if ( ls80dbg.bitv.sound )
-        {
-          sprintf(debugbuf,"preload file:%s",lisyH_wav_file_name[i-1]);
-          lisy80_debug(debugbuf);
-        }
-       }
- }
-
-  //RTH fix for now -> Test: play Introducing sound
-  ret = Mix_PlayChannel( 1, lisy_H_sound[1], 0);
-  if(ret == -1) {
-         fprintf(stderr,"Unable to play WAV file: %s\n", Mix_GetError());
-        }
-*/
-// return(ret);
+//RTH new, sound_init done by lisy80 with dip2 == ON
 
 //RTH test, play sound 7 after starting
 lisy80_play_wav(7);
@@ -382,9 +317,9 @@ void lisy_home_ss_display_event( int digit, int value)
   		if (( lisy_home_ss_digit_ballinplay_status == 1) & ( old_ballinplay_status == 0))
 		 {
 		   //play start sound
-		   lisy35_play_wav(201); //fix setting RTH
+		   StarShip_play_wav(201); //fix setting RTH
 		   //Start play background
-		   lisy35_play_wav(202); //fix setting RTH
+		   StarShip_play_wav(202); //fix setting RTH
 		   //reset displays
 		   wheel_score_reset();
 		 }
@@ -445,7 +380,7 @@ void lisy_home_ss_init_event(void)
  int i;
 
  //start intro sound
- lisy35_play_wav(200); //fix soundnumber for intro RTH
+ StarShip_play_wav(200); //fix soundnumber for intro RTH
 
  //activate GI lamps for credit, drop targets 3000 and top rollover
  for(i=0; i<=127; i++) 
@@ -470,7 +405,7 @@ void lisy_home_ss_cont_switch_event( int switch_no, int action)
  {
    if (action == lisy35_sound_stru[switch_no].trigger) 
 	{ 
-	  lisy35_play_wav(switch_no); 
+	  StarShip_play_wav(switch_no); 
   	  
 	  //wait for sound finished?
 	  if ( lisy35_sound_stru[switch_no].wait != 0)

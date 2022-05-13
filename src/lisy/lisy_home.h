@@ -102,6 +102,7 @@ void lisy_home_ss_event_handler( int id, int arg1, int arg2);
 #define LISY_HOME_SS_EVENT_LAMP 4
 #define LISY_HOME_SS_EVENT_DISPLAY 5
 #define LISY_HOME_SS_EVENT_SWITCH 6
+#define LISY_HOME_SS_EVENT_BOOT 7
 
 //special lamps on Starship
 #define LISY_HOME_SS_LAMP_PLAYER1UP 14

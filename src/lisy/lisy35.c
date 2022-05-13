@@ -124,6 +124,9 @@ void lisy35_ss_init( void )
   }
  }
 
+ //boot ss event handler (will activate i.e. bootsound )
+ lisy_home_ss_event_handler(LISY_HOME_SS_EVENT_BOOT,0,0);
+
  //show green ligth for now, lisy35 is running
  lisy80_set_red_led(0);
  lisy80_set_yellow_led(0);
@@ -205,7 +208,7 @@ if ( lisy35_has_own_sounds )
  //deactivate all special solenoids with a mapping
  lisyh_init_special_coils();
 
- //init ss event handler (will activate i.e. GI, bootsound )
+ //init ss event handler (will activate i.e. GI )
  lisy_home_ss_event_handler(LISY_HOME_SS_EVENT_INIT,0,0);
 
  //collect latest informations and start the lisy logger

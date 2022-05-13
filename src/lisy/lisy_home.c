@@ -290,8 +290,6 @@ void lisy_home_ss_cont_sol_event( unsigned char cont_data )
 {
   lisy35_flipper_disable_status =  CHECK_BIT( cont_data, 2);
 
-  //stop background sound at end of game
-  if ( lisy35_flipper_disable_status == 1) Mix_HaltChannel(202);
 }
 
 void lisy_home_ss_display_event( int digit, int value)
@@ -318,8 +316,6 @@ void lisy_home_ss_display_event( int digit, int value)
 		 {
 		   //play start sound
 		   StarShip_play_wav(201); //fix setting RTH
-		   //Start play background
-		   StarShip_play_wav(202); //fix setting RTH
 		   //reset displays
 		   wheel_score_reset();
 		 }
@@ -375,12 +371,19 @@ void lisy_home_ss_lamp_event( int lamp, int action)
 	}
 }
 
+//things we want to do early after boot
+void lisy_home_ss_boot_event(void)
+{
+
+ //start intro sound in background
+ system("/usr/bin/ogg123 -q /boot/lisy/lisyH/sounds/StarShip/Einschalt_Melodie.ogg &");
+
+}
+
 void lisy_home_ss_init_event(void)
 {
  int i;
 
- //start intro sound
- StarShip_play_wav(200); //fix soundnumber for intro RTH
 
  //activate GI lamps for credit, drop targets 3000 and top rollover
  for(i=0; i<=127; i++) 
@@ -400,6 +403,23 @@ void lisy_home_ss_init_event(void)
 //switch event, map sounds
 void lisy_home_ss_cont_switch_event( int switch_no, int action)
 { 
+ //start/stop background with outhole
+ if ( ( lisy_env.has_own_sounds ) & (switch_no == 8) )
+ {
+	if (action)
+    	   Mix_HaltChannel(202);  //stop background when ball is in outhole
+	else
+	   StarShip_play_wav(202); //fix setting RTH //Start play background with ball eject
+		
+         if ( ls80dbg.bitv.sound )
+          {
+	   if (action) sprintf(debugbuf,"StarShip: stopping background");
+	   else sprintf(debugbuf,"StarShip: starting background");
+          lisy80_debug(debugbuf);
+          }
+ }
+
+
 
  if ( ( lisy_env.has_own_sounds ) & ( ( lisy35_flipper_disable_status == 0) | ( lisy35_sound_stru[switch_no].onlyactiveingame == 0) ) )
  {
@@ -429,6 +449,7 @@ void lisy_home_ss_event_handler( int id, int arg1, int arg2)
 
     switch(id)
 	{
+	 case LISY_HOME_SS_EVENT_BOOT: lisy_home_ss_boot_event( ); break;
 	 case LISY_HOME_SS_EVENT_INIT: lisy_home_ss_init_event( ); break;
 	 case LISY_HOME_SS_EVENT_LAMP: lisy_home_ss_lamp_event( arg1, arg2); break;
 	 case LISY_HOME_SS_EVENT_DISPLAY: lisy_home_ss_display_event( arg1, arg2); break;

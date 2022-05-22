@@ -187,7 +187,7 @@ void lisy_home_ss_lamp_set( int lamp, int action)
     }//debug
 
   //we may set other actions because of lamp status
-  lisy_home_ss_event_handler( LISY_HOME_SS_EVENT_LAMP, lamp, action);
+  lisy_home_ss_event_handler( LISY_HOME_SS_EVENT_LAMP, lamp, action, 0);
 
   //how many mappings?
   for ( i=0; i<lisy_home_ss_lamp_map[lamp].no_of_maps; i++)
@@ -292,12 +292,14 @@ void lisy_home_ss_cont_sol_event( unsigned char cont_data )
 
 }
 
-void lisy_home_ss_display_event( int digit, int value)
+void lisy_home_ss_display_event( int digit, int value, int display)
 {
-	static int old_ballinplay_status = -1;
-	static int old_match_status = -1;
-	static int old_credit_status = -1;
+    static int old_ballinplay_status = -1;
+    static int old_match_status = -1;
+    static int old_credit_status = -1;
 
+    if (display == 0) //status display?
+     {
 	switch(digit)
 	{
 	 //case LISY_HOME_DIGIT_CREDITS10: 
@@ -336,6 +338,11 @@ void lisy_home_ss_display_event( int digit, int value)
 		old_match_status = value;
  		break;
 	}
+   }//status display
+   else
+   {
+	printf("display event: display:%d digit:%d value:%d\n",display,digit,value);
+   }
 }
 
 void lisy_home_ss_lamp_event( int lamp, int action)
@@ -362,18 +369,23 @@ void lisy_home_ss_lamp_event( int lamp, int action)
 		 lisy_home_ss_special_lamp_set ( 18, action); 
  		break;
 	 case LISY_HOME_SS_LAMP_GAMEOVER: 
-		 //make sure reset credit wheel does not block solenoid off by waiting for game over
 		 if ( action == 1)
 			{
 			  //stop background sound (add on, also stopped when ball is in outhole)
-    	   		  Mix_HaltChannel(202);
-		         //make sure reset credit wheel does not block solenoid off by waiting for game over
+ 			  if ( lisy_env.has_own_sounds ) Mix_HaltChannel(202);
+			}
+		 else
+			{
+		         //make sure reset credit wheel does not block solenoid off by waiting for game over off
 		         if ( want_wheel_score_credits_reset == 1)
 			 {
 			   want_wheel_score_credits_reset = 0;
 		   	   wheel_score_credits_reset();
 			 }
 			}
+ 		break;
+	 case LISY_HOME_SS_LAMP_HSTD: 
+		 printf("HIGH score to date action:%d\n",action);
  		break;
 	}
 }
@@ -383,7 +395,7 @@ void lisy_home_ss_boot_event(void)
 {
 
  //start intro sound in background
- system("/usr/bin/ogg123 -q /boot/lisy/lisyH/sounds/StarShip/Einschalt_Melodie.ogg &");
+ if ( lisy_env.has_own_sounds ) system("/usr/bin/ogg123 -q /boot/lisy/lisyH/sounds/StarShip/Einschalt_Melodie.ogg &");
 
 }
 
@@ -451,7 +463,7 @@ void lisy_home_ss_cont_switch_event( int switch_no, int action)
 
 
 //the Starship eventhandler
-void lisy_home_ss_event_handler( int id, int arg1, int arg2)
+void lisy_home_ss_event_handler( int id, int arg1, int arg2, int arg3)
 {
 
     switch(id)
@@ -459,7 +471,7 @@ void lisy_home_ss_event_handler( int id, int arg1, int arg2)
 	 case LISY_HOME_SS_EVENT_BOOT: lisy_home_ss_boot_event( ); break;
 	 case LISY_HOME_SS_EVENT_INIT: lisy_home_ss_init_event( ); break;
 	 case LISY_HOME_SS_EVENT_LAMP: lisy_home_ss_lamp_event( arg1, arg2); break;
-	 case LISY_HOME_SS_EVENT_DISPLAY: lisy_home_ss_display_event( arg1, arg2); break;
+	 case LISY_HOME_SS_EVENT_DISPLAY: lisy_home_ss_display_event( arg1, arg2, arg3); break;
 	 case LISY_HOME_SS_EVENT_CONT_SOL: lisy_home_ss_cont_sol_event( arg1 ); break;
 	 case LISY_HOME_SS_EVENT_SWITCH: lisy_home_ss_cont_switch_event( arg1, arg2 ); break;
 	}

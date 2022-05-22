@@ -85,7 +85,7 @@ t_lisy_home_ss_GI_leds;
 void lisy_home_ss_mom_coil_set( unsigned char value);
 void lisy_home_ss_cont_coil_set( unsigned char cont_data);
 void lisy_home_ss_send_led_colors( void);
-void lisy_home_ss_event_handler( int id, int arg1, int arg2);
+void lisy_home_ss_event_handler( int id, int arg1, int arg2, int arg3);
 
 //the IDs for the event handler
 #define LISY_HOME_EVENT_INIT 0
@@ -108,6 +108,7 @@ void lisy_home_ss_event_handler( int id, int arg1, int arg2);
 #define LISY_HOME_SS_LAMP_PLAYER1UP 14
 #define LISY_HOME_SS_LAMP_PLAYER2UP 29
 #define LISY_HOME_SS_LAMP_1CANPLAY 13
+#define LISY_HOME_SS_LAMP_HSTD 27
 #define LISY_HOME_SS_LAMP_2CANPLAY 28
 #define LISY_HOME_SS_LAMP_GAMEOVER 42
 

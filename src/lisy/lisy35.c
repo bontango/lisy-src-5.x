@@ -125,7 +125,7 @@ void lisy35_ss_init( void )
  }
 
  //boot ss event handler (will activate i.e. bootsound )
- lisy_home_ss_event_handler(LISY_HOME_SS_EVENT_BOOT,0,0);
+ lisy_home_ss_event_handler(LISY_HOME_SS_EVENT_BOOT,0,0,0);
 
  //show green ligth for now, lisy35 is running
  lisy80_set_red_led(0);
@@ -209,7 +209,7 @@ if ( lisy35_has_own_sounds )
  lisyh_init_special_coils();
 
  //init ss event handler (will activate i.e. GI )
- lisy_home_ss_event_handler(LISY_HOME_SS_EVENT_INIT,0,0);
+ lisy_home_ss_event_handler(LISY_HOME_SS_EVENT_INIT,0,0,0);
 
  //collect latest informations and start the lisy logger
  lisy_env.has_soundcard = lisy35_has_soundcard;
@@ -664,7 +664,7 @@ if ( ( ls80dbg.bitv.basic ) & ( ret == 80))
 
  //running on Starship? switchnumber has to be increased
  if (( lisy_hardware_revision == 200 ) & ( ret != 80 ))
-		 lisy_home_ss_event_handler( LISY_HOME_SS_EVENT_SWITCH, ret+1, action);
+		 lisy_home_ss_event_handler( LISY_HOME_SS_EVENT_SWITCH, ret+1, action, 0);
 
 //ignore credit switch if we running on Starship
 //and 2canplay lamp is ON
@@ -1408,7 +1408,7 @@ void lisy35_solenoid_handler(unsigned char data, unsigned char soundselect)
   if (( old_cont_data != cont_data ) & ( lisy35_bally_hw_check_finished ==1))
   {
     //running on Starship?
-    if ( lisy_hardware_revision == 200 ) lisy_home_ss_event_handler( LISY_HOME_SS_EVENT_CONT_SOL, cont_data, 0);
+    if ( lisy_hardware_revision == 200 ) lisy_home_ss_event_handler( LISY_HOME_SS_EVENT_CONT_SOL, cont_data, 0, 0);
 
     //check for flipper disable
     if( CHECK_BIT( cont_data, 2) && !CHECK_BIT( old_cont_data, 2))

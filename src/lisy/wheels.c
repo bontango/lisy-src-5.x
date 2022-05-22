@@ -353,6 +353,9 @@ void wheels_show_int( int display, int digit, unsigned char dat)
    int newcredits;
    static int oldcredits = 0;
 
+   //inform the handler
+   lisy_home_ss_event_handler( LISY_HOME_SS_EVENT_DISPLAY, digit, dat, display);
+
    //status display
    //digt 3&4 are credits
    //digit 6 Endzahl
@@ -361,7 +364,6 @@ void wheels_show_int( int display, int digit, unsigned char dat)
 	{
           if ( dat > 9 ) return; //ignore spaces
 
-	  lisy_home_ss_event_handler( LISY_HOME_SS_EVENT_DISPLAY, digit, dat);
 
 
 	  if (digit == 3) //tens changed

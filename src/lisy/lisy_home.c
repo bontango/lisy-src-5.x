@@ -361,11 +361,18 @@ void lisy_home_ss_lamp_event( int lamp, int action)
 		 lisy_home_ss_special_lamp_set ( 17, action); 
 		 lisy_home_ss_special_lamp_set ( 18, action); 
  		break;
-	 case LISY_HOME_SS_LAMP_GAMEOVER: //make sure reset credit wheel does not block solenoid off by waiting for game over
-		 if (( action = 1) &( want_wheel_score_credits_reset = 1))
+	 case LISY_HOME_SS_LAMP_GAMEOVER: 
+		 //make sure reset credit wheel does not block solenoid off by waiting for game over
+		 if ( action == 1)
 			{
-			 want_wheel_score_credits_reset = 0;
-		   	 wheel_score_credits_reset();
+			  //stop background sound (add on, also stopped when ball is in outhole)
+    	   		  Mix_HaltChannel(202);
+		         //make sure reset credit wheel does not block solenoid off by waiting for game over
+		         if ( want_wheel_score_credits_reset == 1)
+			 {
+			   want_wheel_score_credits_reset = 0;
+		   	   wheel_score_credits_reset();
+			 }
 			}
  		break;
 	}

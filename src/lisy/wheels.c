@@ -31,8 +31,9 @@
 //for Starship Switches
 extern unsigned char swMatrixLISY35[9];
 
-//from lisy35.c
+//from lisy_home.c
 extern unsigned char lisy35_flipper_disable_status;
+extern unsigned char lisy35_mom_solenoid_status_safe;
 
 //internal to wheels
 int oldpos[2][5];
@@ -86,6 +87,9 @@ void wheels_refresh(void)
         switch(wheel_credits_state)
         {
          case WHEEL_STATE_OFF: //wheel is ready for pulse
+		//only activate if state from mom solenoids is safe
+		if ( lisy35_mom_solenoid_status_safe != 1) break;
+
                 if ( wheel_pulses_credits_needed != 0) //do we need to pulse?
                  {
    			// wheel_pulse_reset(10); credit UP
@@ -137,6 +141,9 @@ void wheels_refresh(void)
 	switch(wheel_state[i][j])
 	{
 	 case WHEEL_STATE_OFF: //wheel is ready for pulse
+		//only activate if state from mom solenoids is safe
+		if ( lisy35_mom_solenoid_status_safe != 1) break;
+
 		if ( wheel_pulses_needed[i][j] > 0) //do we need to pulse?
 		 {
 		  //yes store pulse and delay time for this digit

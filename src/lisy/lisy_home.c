@@ -283,13 +283,19 @@ unsigned char lisy_home_ss_lamp_1canplay_status = 0;
 unsigned char lisy_home_ss_lamp_2canplay_status = 0;
 unsigned char lisy_home_ss_digit_ballinplay_status = 80;
 unsigned char lisy35_flipper_disable_status = 1; //default flipper disbaled
-unsigned char want_wheel_score_credits_reset = 0;
+unsigned char lisy35_mom_solenoid_status_safe = 1; //default mom solenoid status (safe)
 
 
 void lisy_home_ss_cont_sol_event( unsigned char cont_data )
 {
   lisy35_flipper_disable_status =  CHECK_BIT( cont_data, 2);
+}
 
+//store status for safe lisy home solenoid activation
+void lisy_home_ss_mom_sol_event( unsigned char mom_data )
+{
+  if ( mom_data == 15) lisy35_mom_solenoid_status_safe = 1; //rest position is safe
+	else lisy35_mom_solenoid_status_safe = 0;
 }
 
 void lisy_home_ss_display_event( int digit, int value, int display)
@@ -297,6 +303,8 @@ void lisy_home_ss_display_event( int digit, int value, int display)
     static int old_ballinplay_status = -1;
     static int old_match_status = -1;
     static int old_credit_status = -1;
+
+	//printf("display event: display:%d digit:%d value:%d\n",display,digit,value);
 
     if (display == 0) //status display?
      {
@@ -308,7 +316,6 @@ void lisy_home_ss_display_event( int digit, int value, int display)
 		if ( old_credit_status < 0 )
 		{
 		   old_credit_status = value;
-		   want_wheel_score_credits_reset = 1;
 		}
  		break;
 	 case LISY_HOME_DIGIT_BALLINPLAY: 
@@ -341,7 +348,7 @@ void lisy_home_ss_display_event( int digit, int value, int display)
    }//status display
    else
    {
-	printf("display event: display:%d digit:%d value:%d\n",display,digit,value);
+//	printf("display event: display:%d digit:%d value:%d\n",display,digit,value);
    }
 }
 
@@ -374,18 +381,9 @@ void lisy_home_ss_lamp_event( int lamp, int action)
 			  //stop background sound (add on, also stopped when ball is in outhole)
  			  if ( lisy_env.has_own_sounds ) Mix_HaltChannel(202);
 			}
-		 else
-			{
-		         //make sure reset credit wheel does not block solenoid off by waiting for game over off
-		         if ( want_wheel_score_credits_reset == 1)
-			 {
-			   want_wheel_score_credits_reset = 0;
-		   	   wheel_score_credits_reset();
-			 }
-			}
  		break;
 	 case LISY_HOME_SS_LAMP_HSTD: 
-		 printf("HIGH score to date action:%d\n",action);
+		 //printf("HIGH score to date action:%d\n",action);
  		break;
 	}
 }
@@ -403,6 +401,8 @@ void lisy_home_ss_init_event(void)
 {
  int i;
 
+ //reset credit wheels
+ wheel_score_credits_reset();
 
  //activate GI lamps for credit, drop targets 3000 and top rollover
  for(i=0; i<=127; i++) 
@@ -473,6 +473,7 @@ void lisy_home_ss_event_handler( int id, int arg1, int arg2, int arg3)
 	 case LISY_HOME_SS_EVENT_LAMP: lisy_home_ss_lamp_event( arg1, arg2); break;
 	 case LISY_HOME_SS_EVENT_DISPLAY: lisy_home_ss_display_event( arg1, arg2, arg3); break;
 	 case LISY_HOME_SS_EVENT_CONT_SOL: lisy_home_ss_cont_sol_event( arg1 ); break;
+	 case LISY_HOME_SS_EVENT_MOM_SOL: lisy_home_ss_mom_sol_event( arg1 ); break;
 	 case LISY_HOME_SS_EVENT_SWITCH: lisy_home_ss_cont_switch_event( arg1, arg2 ); break;
 	}
 

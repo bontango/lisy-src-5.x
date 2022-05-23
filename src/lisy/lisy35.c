@@ -208,7 +208,7 @@ if ( lisy35_has_own_sounds )
  //deactivate all special solenoids with a mapping
  lisyh_init_special_coils();
 
- //init ss event handler (will activate i.e. GI )
+ //init ss event handler (will activate i.e. GI and reset credit wheels )
  lisy_home_ss_event_handler(LISY_HOME_SS_EVENT_INIT,0,0,0);
 
  //collect latest informations and start the lisy logger
@@ -1466,6 +1466,9 @@ void lisy35_solenoid_handler(unsigned char data, unsigned char soundselect)
        sprintf(debugbuf,"momentary solenoids: %d",moment_data);
        lisy80_debug(debugbuf);
      }
+
+    //running on Starship?
+    if ( lisy_hardware_revision == 200 ) lisy_home_ss_event_handler( LISY_HOME_SS_EVENT_MOM_SOL, moment_data, 0, 0);
 
      //JustBoom Sound? in case of chimes we may want to play wav files here
      if ( lisy35_has_own_sounds ) 

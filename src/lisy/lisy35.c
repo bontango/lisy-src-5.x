@@ -125,7 +125,7 @@ void lisy35_ss_init( void )
  }
 
  //boot ss event handler (will activate i.e. bootsound )
- lisy_home_ss_event_handler(LISY_HOME_SS_EVENT_BOOT,0,0,0);
+ lisy_home_ss_event_handler(LISY_HOME_SS_EVENT_BOOT,lisy35_has_soundcard,0,0);
 
  //show green ligth for now, lisy35 is running
  lisy80_set_red_led(0);

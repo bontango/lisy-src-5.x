@@ -391,11 +391,11 @@ void lisy_home_ss_lamp_event( int lamp, int action)
 }
 
 //things we want to do early after boot
-void lisy_home_ss_boot_event(void)
+void lisy_home_ss_boot_event(int arg1)
 {
 
- //start intro sound in background
- if ( lisy_env.has_own_sounds ) system("/usr/bin/ogg123 -q /boot/lisy/lisyH/sounds/StarShip/Einschalt_Melodie.ogg &");
+ //start intro sound in background if "lisy35_has_soundcard" 
+ if ( arg1 ) system("/usr/bin/ogg123 -q /boot/lisy/lisyH/sounds/StarShip/Einschalt_Melodie.ogg &");
 
 }
 
@@ -468,7 +468,7 @@ void lisy_home_ss_event_handler( int id, int arg1, int arg2, int arg3)
 
     switch(id)
 	{
-	 case LISY_HOME_SS_EVENT_BOOT: lisy_home_ss_boot_event( ); break;
+	 case LISY_HOME_SS_EVENT_BOOT: lisy_home_ss_boot_event( arg1 ); break;
 	 case LISY_HOME_SS_EVENT_INIT: lisy_home_ss_init_event( ); break;
 	 case LISY_HOME_SS_EVENT_LAMP: lisy_home_ss_lamp_event( arg1, arg2); break;
 	 case LISY_HOME_SS_EVENT_DISPLAY: lisy_home_ss_display_event( arg1, arg2, arg3); break;

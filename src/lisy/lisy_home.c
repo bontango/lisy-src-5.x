@@ -420,7 +420,7 @@ void lisy_home_ss_init_event(void)
 }
 
 //switch event, map sounds
-void lisy_home_ss_cont_switch_event( int switch_no, int action)
+void lisy_home_ss_switch_event( int switch_no, int action)
 { 
  //start/stop background with outhole
  if ( ( lisy_env.has_own_sounds ) & (switch_no == 8) )
@@ -474,7 +474,7 @@ void lisy_home_ss_event_handler( int id, int arg1, int arg2, int arg3)
 	 case LISY_HOME_SS_EVENT_DISPLAY: lisy_home_ss_display_event( arg1, arg2, arg3); break;
 	 case LISY_HOME_SS_EVENT_CONT_SOL: lisy_home_ss_cont_sol_event( arg1 ); break;
 	 case LISY_HOME_SS_EVENT_MOM_SOL: lisy_home_ss_mom_sol_event( arg1 ); break;
-	 case LISY_HOME_SS_EVENT_SWITCH: lisy_home_ss_cont_switch_event( arg1, arg2 ); break;
+	 case LISY_HOME_SS_EVENT_SWITCH: lisy_home_ss_switch_event( arg1, arg2 ); break;
 	}
 
   //2canplay lamp blocks credit switch when ball in play is 1 ( only 2 players on Starship)

@@ -1588,7 +1588,11 @@ unsigned char sound_E;
      // reset int condition
      sound_int_occured = 0;
      //JustBoom Sound? we may want to play wav files here
-     if ( lisy35_has_own_sounds ) lisy35_play_wav(16*last_sound_E + data);
+     if ( lisy35_has_own_sounds )
+	   lisy35_play_wav(16*last_sound_E + data);
+     //Starship? inform even handler
+     if ( StarShip_has_own_sounds )
+     	   	lisy_home_ss_event_handler(LISY_HOME_SS_EVENT_SOUND,16*last_sound_E + data,0,0);
      //debug?
      if ( ls80dbg.bitv.sound )
       {

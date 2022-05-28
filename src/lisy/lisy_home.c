@@ -285,6 +285,7 @@ void lisy_home_ss_send_led_colors( void)
 unsigned char lisy_home_ss_lamp_1canplay_status = 0;
 unsigned char lisy_home_ss_lamp_2canplay_status = 0;
 unsigned char lisy_home_ss_digit_ballinplay_status = 80;
+unsigned char lisy_home_ss_switch_outhole_status = 0;
 unsigned char lisy35_flipper_disable_status = 1; //default flipper disbaled
 unsigned char lisy35_mom_solenoid_status_safe = 1; //default mom solenoid status (safe)
 
@@ -299,6 +300,16 @@ void lisy_home_ss_mom_sol_event( unsigned char mom_data )
 {
   if ( mom_data == 15) lisy35_mom_solenoid_status_safe = 1; //rest position is safe
 	else lisy35_mom_solenoid_status_safe = 0;
+}
+
+//sound from internal sound card (bally generated)
+void lisy_home_ss_sound_event( unsigned char sound )
+{
+  //play bonus sound ( fix #203 ) triggered with one of the org sounds
+  if ( ( lisy_env.has_own_sounds ) & ( sound == 8 ) )
+	{
+  	  if ( lisy_home_ss_switch_outhole_status == 1) StarShip_play_wav(203);
+	}
 }
 
 void lisy_home_ss_display_event( int digit, int value, int display)
@@ -432,23 +443,11 @@ void lisy_home_ss_init_event(void)
 //switch event, map sounds
 void lisy_home_ss_switch_event( int switch_no, int action)
 { 
- /*
- //start/stop background with outhole
- if ( ( lisy_env.has_own_sounds ) & (switch_no == 8) )
+ //remember status of outhole switch
+ if (switch_no == 8)
  {
-	if (action)
-    	   Mix_HaltChannel(202);  //stop background when ball is in outhole
-	else
-	   StarShip_play_wav(202); //fix setting RTH //Start play background with ball eject
-		
-         if ( ls80dbg.bitv.sound )
-          {
-	   if (action) sprintf(debugbuf,"StarShip: stopping background");
-	   else sprintf(debugbuf,"StarShip: starting background");
-          lisy80_debug(debugbuf);
-          }
+	lisy_home_ss_switch_outhole_status = action;
  }
-*/
 
 
  if ( ( lisy_env.has_own_sounds ) & ( ( lisy35_flipper_disable_status == 0) | ( lisy35_sound_stru[switch_no].onlyactiveingame == 0) ) )
@@ -486,6 +485,7 @@ void lisy_home_ss_event_handler( int id, int arg1, int arg2, int arg3)
 	 case LISY_HOME_SS_EVENT_CONT_SOL: lisy_home_ss_cont_sol_event( arg1 ); break;
 	 case LISY_HOME_SS_EVENT_MOM_SOL: lisy_home_ss_mom_sol_event( arg1 ); break;
 	 case LISY_HOME_SS_EVENT_SWITCH: lisy_home_ss_switch_event( arg1, arg2 ); break;
+	 case LISY_HOME_SS_EVENT_SOUND: lisy_home_ss_sound_event( arg1 ); break;
 	}
 
   //2canplay lamp blocks credit switch when ball in play is 1 ( only 2 players on Starship)

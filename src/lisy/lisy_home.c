@@ -29,8 +29,11 @@
 #include "lisy.h"
 
 
+//local vars
 //our pointers to preloaded sounds
 Mix_Chunk *lisy_H_sound[32];
+//others
+unsigned char lisy_game_running = 0; //for Starship event handler
 
 #define LISYH_SOUND_PATH "/boot/lisy/lisyH/sounds/"
 //init
@@ -378,8 +381,15 @@ void lisy_home_ss_lamp_event( int lamp, int action)
 	 case LISY_HOME_SS_LAMP_GAMEOVER: 
 		 if ( action == 1)
 			{
-			  //stop background sound (add on, also stopped when ball is in outhole)
+			  //stop background sound
  			  if ( lisy_env.has_own_sounds ) Mix_HaltChannel(202);
+			  lisy_game_running = 0;
+			}
+		else 
+			{
+ 			   //fix setting RTH //Start play background
+	   	  	   if ( lisy_env.has_own_sounds ) StarShip_play_wav(202);
+			  lisy_game_running = 1;
 			}
  		break;
 	 case LISY_HOME_SS_LAMP_HSTD: 
@@ -422,6 +432,7 @@ void lisy_home_ss_init_event(void)
 //switch event, map sounds
 void lisy_home_ss_switch_event( int switch_no, int action)
 { 
+ /*
  //start/stop background with outhole
  if ( ( lisy_env.has_own_sounds ) & (switch_no == 8) )
  {
@@ -437,7 +448,7 @@ void lisy_home_ss_switch_event( int switch_no, int action)
           lisy80_debug(debugbuf);
           }
  }
-
+*/
 
 
  if ( ( lisy_env.has_own_sounds ) & ( ( lisy35_flipper_disable_status == 0) | ( lisy35_sound_stru[switch_no].onlyactiveingame == 0) ) )

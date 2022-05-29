@@ -386,8 +386,18 @@ void lisy_home_ss_lamp_event( int lamp, int action)
  		break;
 	 case LISY_HOME_SS_LAMP_2CANPLAY: 
 		 lisy_home_ss_lamp_2canplay_status = action;
-		 lisy_home_ss_special_lamp_set ( 17, action); 
-		 lisy_home_ss_special_lamp_set ( 18, action); 
+		 if ( lisy_home_ss_lamp_2canplay_status ==1)
+		 {
+		 lisy_home_ss_special_lamp_set ( 15, 1); 
+		 lisy_home_ss_special_lamp_set ( 16, 1); 
+		 lisy_home_ss_special_lamp_set ( 17, 1); 
+		 lisy_home_ss_special_lamp_set ( 18, 1); 
+		 }
+		 else
+		 {
+		 lisy_home_ss_special_lamp_set ( 17, 0); 
+		 lisy_home_ss_special_lamp_set ( 18, 0); 
+		 }
  		break;
 	 case LISY_HOME_SS_LAMP_GAMEOVER: 
 		 if ( action == 1)

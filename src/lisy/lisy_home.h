@@ -81,6 +81,14 @@ typedef struct
 }
 t_lisy_home_ss_GI_leds;
 
+//starship general parms
+typedef struct
+{
+  int hstd_cycle;
+  int hstd_sleep;
+}
+t_lisy_home_ss_general;
+
 
 void lisy_home_ss_mom_coil_set( unsigned char value);
 void lisy_home_ss_cont_coil_set( unsigned char cont_data);

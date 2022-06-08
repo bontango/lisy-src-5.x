@@ -204,6 +204,9 @@ if ( lisy35_has_own_sounds )
  lisyh_coil_select_led_driver_line(1);
  // send colorcodes to LED driver
  lisy_home_ss_send_led_colors();
+ //read the csv file for Starship general parameters
+  lisy_file_get_home_ss_general();
+
 
  //deactivate all special solenoids with a mapping
  lisyh_init_special_coils();

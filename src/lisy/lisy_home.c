@@ -34,6 +34,11 @@
 Mix_Chunk *lisy_H_sound[32];
 //others
 unsigned char lisy_game_running = 0; //for Starship event handler
+unsigned char lisy_hstd_lamp = 0; //high score to date lamp status
+unsigned char ss_disp[2][6]; //current display Starship
+unsigned char ss_hstd_disp[2][6]  = { { 0,0,0,0,0,0},{ 0,0,0,0,0,0 } };  //last High score to date
+unsigned char ss_game_disp[2][6]  = { { 0,0,0,0,0,0},{ 0,0,0,0,0,0 } };  //last game score 
+struct timeval hstd_now, hstd_last; //high score today last occurence
 
 #define LISYH_SOUND_PATH "/boot/lisy/lisyH/sounds/"
 //init
@@ -317,6 +322,7 @@ void lisy_home_ss_display_event( int digit, int value, int display)
     static int old_ballinplay_status = -1;
     static int old_match_status = -1;
     static int old_credit_status = -1;
+    static int hstd_first = 1;
 
 	//printf("display event: display:%d digit:%d value:%d\n",display,digit,value);
 
@@ -362,13 +368,41 @@ void lisy_home_ss_display_event( int digit, int value, int display)
    }//status display
    else
    {
-//	printf("display event: display:%d digit:%d value:%d\n",display,digit,value);
+	//store current score displays
+	if ( display < 3 ) 
+	{
+	 if ( lisy_hstd_lamp == 1)
+		{
+		 if ( hstd_first )
+			{
+			  hstd_first = 0;
+			  gettimeofday(&hstd_last,(struct timezone *)0);
+			}
+		else
+			{
+			  gettimeofday(&hstd_now,(struct timezone *)0);
+			  //was last update a second ago?
+			  if ( ( hstd_now.tv_sec - hstd_last.tv_sec ) > 0 )
+				{
+				  memcpy(ss_hstd_disp, ss_disp, sizeof ss_hstd_disp);
+				}
+			  hstd_last.tv_sec = hstd_now.tv_sec;
+			}
+		}
+	else
+		{
+		  hstd_first =1; //reset value
+		}
+	//update internal score
+	if (value > 9) value = 0;
+	ss_disp[display-1][digit-2] = value;
+	}
    }
 }
 
 void lisy_home_ss_lamp_event( int lamp, int action)
 {
-
+	static int hstd_count = 0;
 	switch(lamp)
 	{
 	 case LISY_HOME_SS_LAMP_1CANPLAY: //set light on player1 to ON if 1canplay or 2canplay is ON
@@ -405,6 +439,10 @@ void lisy_home_ss_lamp_event( int lamp, int action)
 			  //stop background sound
  			  if ( lisy_env.has_own_sounds ) Mix_HaltChannel(202);
 			  lisy_game_running = 0;
+			  //store last score
+			  memcpy(ss_game_disp, ss_disp, sizeof ss_game_disp);
+			  //reset hstd count
+			  hstd_count = 0;
 			}
 		else 
 			{
@@ -414,7 +452,14 @@ void lisy_home_ss_lamp_event( int lamp, int action)
 			}
  		break;
 	 case LISY_HOME_SS_LAMP_HSTD: 
-		 //printf("HIGH score to date action:%d\n",action);
+		lisy_hstd_lamp = action;
+		//count the events
+		if (action) hstd_count++;
+		if ( hstd_count > lisy_home_ss_general.hstd_cycle)
+			{
+			hstd_count = 0;
+			wheel_hstd( ss_hstd_disp, ss_game_disp,  lisy_home_ss_general.hstd_sleep );
+			}
  		break;
 	}
 }

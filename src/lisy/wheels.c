@@ -12,6 +12,7 @@
 #include <time.h>
 #include <sys/time.h>
 #include <wiringPi.h>
+#include <unistd.h>
 #include "lisy35.h"
 #include "fileio.h"
 #include "hw_lib.h"
@@ -501,4 +502,121 @@ void wheel_score( int display, char *data)
 	while ( pulses[1][2]-- >0 ) wheel_pulse(14);
 	while ( pulses[1][3]-- >0 ) wheel_pulse(15);
 	while ( pulses[1][4]-- >0 ) wheel_pulse(16);
+}
+
+//set the wheel for HSTD
+void wheel_hstd_set( int w_pulses_needed[][5])
+{
+ int wheel_state[2][5] = { { 0,0,0,0,0},{ 0,0,0,0,0 } };
+ int i,j,coil,not_finished;
+ int pulse_time[2][5],pulse_time_credit;
+ int delay_time[2][5],delay_time_credit;
+
+ do {
+  //check all 10 wheels
+  for(i=0; i<=1; i++) {
+        for(j=0; j<=4; j++) {
+
+        //state of current digit
+        switch(wheel_state[i][j])
+        {
+         case WHEEL_STATE_OFF: //wheel is ready for pulse
+
+                if ( w_pulses_needed[i][j] > 0) //do we need to pulse?
+                 {
+                  //yes store pulse and delay time for this digit
+                  //decrement puls couinter and change state to ON
+                  w_pulses_needed[i][j] -= 1;
+                  coil = digit2sol(i, j);
+                  lisyh_coil_set(  lisy_home_ss_special_coil_map[coil].mapped_to_coil, 1);
+                  pulse_time[i][j] = lisy_home_ss_special_coil_map[coil].pulsetime;
+                  delay_time[i][j] = lisy_home_ss_special_coil_map[coil].delay;
+                  wheel_state[i][j] = WHEEL_STATE_ON;
+                 }
+                break;
+
+         case WHEEL_STATE_ON: //wheel is active, count down pulstime
+                pulse_time[i][j] = pulse_time[i][j] -5; //5ms per call
+                if ( pulse_time[i][j] <= 0 ) //pulse time expired?
+                 {
+                  //yes deactivate sol and change state to DELAY
+                  coil = digit2sol(i, j);
+                  lisyh_coil_set(  lisy_home_ss_special_coil_map[coil].mapped_to_coil, 0);
+                  wheel_state[i][j] = WHEEL_STATE_DELAY;
+                 }
+                break;
+
+         case WHEEL_STATE_DELAY: //wheel inactive but in delay state ( we need to prevent too fast pulsing)
+                delay_time[i][j] = delay_time[i][j] -5; //5ms per call
+                if ( delay_time[i][j] <= 0 ) //delay_time time expired?
+                 {
+                  //yes change state to OFF
+                  wheel_state[i][j] = WHEEL_STATE_OFF;
+                 }
+                break;
+
+        }//state
+   } //j
+  } //i
+
+  delay (5); // 5 milliseconds
+
+  //calculate end condition
+  //we are finished if all wheels are off
+  //and all pulses are done
+  not_finished = 0;
+  for(i=0; i<=1; i++) {
+        for(j=0; j<=4; j++) {
+
+        if ( wheel_state[i][j] != WHEEL_STATE_OFF ) not_finished++;
+	not_finished += w_pulses_needed[i][j];
+    }
+  }
+
+ } while(not_finished);
+}
+
+
+//high score today with wheels
+void wheel_hstd(unsigned char ss_hstd_disp[][6], unsigned char ss_game_disp[][6], int sleeptime )
+{
+  int i,j;
+  int w_pulses_needed[2][5];
+
+
+  //calculate pulses needed from current score to hstd
+  for(i=0; i<=1; i++) {
+        for(j=0; j<=4; j++) {
+        w_pulses_needed[i][j] =  ss_hstd_disp[i][j] - ss_game_disp[i][j];
+	if ( w_pulses_needed[i][j] < 0) w_pulses_needed[i][j] += 10;
+	//printf(" %d pulses needed\n",w_pulses_needed[i][j]);
+    }
+  }
+	//call refresh state machine 
+	wheel_hstd_set( w_pulses_needed );
+	
+	//wait
+	sleep(sleeptime);
+	//calculate pulses needed from hstd to current score ( should be 10-pulses done))
+  for(i=0; i<=1; i++) {
+        for(j=0; j<=4; j++) {
+        w_pulses_needed[i][j] =  ss_game_disp[i][j] - ss_hstd_disp[i][j];
+	if ( w_pulses_needed[i][j] < 0) w_pulses_needed[i][j] += 10;
+	//printf(" %d pulses needed\n",w_pulses_needed[i][j]);
+    }
+  }
+	//call refresh state machine 
+	wheel_hstd_set( w_pulses_needed );
+
+/*
+printf("wheel_hstd called \n");
+for (int i=0; i<=5; i++) printf("%d",ss_hstd_disp[0][i]);
+printf(" ");
+for (int i=0; i<=5; i++) printf("%d",ss_hstd_disp[1][i]);
+printf("\n");
+for (int i=0; i<=5; i++) printf("%d",ss_game_disp[0][i]);
+printf(" ");
+for (int i=0; i<=5; i++) printf("%d",ss_game_disp[1][i]);
+printf("\n");
+*/
 }

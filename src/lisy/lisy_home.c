@@ -34,11 +34,8 @@
 Mix_Chunk *lisy_H_sound[32];
 //others
 unsigned char lisy_game_running = 0; //for Starship event handler
-unsigned char lisy_hstd_lamp = 0; //high score to date lamp status
-unsigned char ss_disp[2][6]; //current display Starship
-unsigned char ss_hstd_disp[2][6]  = { { 0,0,0,0,0,0},{ 0,0,0,0,0,0 } };  //last High score to date
-unsigned char ss_game_disp[2][6]  = { { 0,0,0,0,0,0},{ 0,0,0,0,0,0 } };  //last game score 
-struct timeval hstd_now, hstd_last; //high score today last occurence
+//cmos
+extern lisy35_cmos_data_t *lisy_by35_CMOS;
 
 #define LISYH_SOUND_PATH "/boot/lisy/lisyH/sounds/"
 //init
@@ -366,38 +363,6 @@ void lisy_home_ss_display_event( int digit, int value, int display)
  		break;
 	}
    }//status display
-   else
-   {
-	//store current score displays
-	if ( display < 3 ) 
-	{
-	 if ( lisy_hstd_lamp == 1)
-		{
-		 if ( hstd_first )
-			{
-			  hstd_first = 0;
-			  gettimeofday(&hstd_last,(struct timezone *)0);
-			}
-		else
-			{
-			  gettimeofday(&hstd_now,(struct timezone *)0);
-			  //was last update a second ago?
-			  if ( ( hstd_now.tv_sec - hstd_last.tv_sec ) > 0 )
-				{
-				  memcpy(ss_hstd_disp, ss_disp, sizeof ss_hstd_disp);
-				}
-			  hstd_last.tv_sec = hstd_now.tv_sec;
-			}
-		}
-	else
-		{
-		  hstd_first =1; //reset value
-		}
-	//update internal score
-	if (value > 9) value = 0;
-	ss_disp[display-1][digit-2] = value;
-	}
-   }
 }
 
 void lisy_home_ss_lamp_event( int lamp, int action)
@@ -439,8 +404,6 @@ void lisy_home_ss_lamp_event( int lamp, int action)
 			  //stop background sound
  			  if ( lisy_env.has_own_sounds ) Mix_HaltChannel(202);
 			  lisy_game_running = 0;
-			  //store last score
-			  memcpy(ss_game_disp, ss_disp, sizeof ss_game_disp);
 			  //reset hstd count
 			  hstd_count = 0;
 			}
@@ -452,13 +415,14 @@ void lisy_home_ss_lamp_event( int lamp, int action)
 			}
  		break;
 	 case LISY_HOME_SS_LAMP_HSTD: 
-		lisy_hstd_lamp = action;
 		//count the events
 		if (action) hstd_count++;
 		if ( hstd_count > lisy_home_ss_general.hstd_cycle)
 			{
 			hstd_count = 0;
-			wheel_hstd( ss_hstd_disp, ss_game_disp,  lisy_home_ss_general.hstd_sleep );
+			wheel_hstd( lisy_by35_CMOS->para.hstd,
+					 lisy_by35_CMOS->para.disp1_backup, lisy_by35_CMOS->para.disp2_backup,
+					 lisy_home_ss_general.hstd_sleep );
 			}
  		break;
 	}
@@ -479,6 +443,8 @@ void lisy_home_ss_init_event(void)
 
  //reset credit wheels
  wheel_score_credits_reset();
+ //reset displays
+ wheel_score_reset();
 
  //activate GI lamps for credit, drop targets 3000 and top rollover
  for(i=0; i<=127; i++) 
@@ -546,6 +512,5 @@ void lisy_home_ss_event_handler( int id, int arg1, int arg2, int arg3)
   //2canplay lamp blocks credit switch when ball in play is 1 ( only 2 players on Starship)
   if  (( lisy_home_ss_lamp_2canplay_status == 1)  & ( lisy_home_ss_digit_ballinplay_status == 1))
 	lisy_home_ss_ignore_credit = 1; else lisy_home_ss_ignore_credit = 0;
-
 
 }

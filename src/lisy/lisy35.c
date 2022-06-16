@@ -1281,6 +1281,15 @@ int lisy35_get_mpudips( int switch_nr )
 
 }
 
+//lisy35_nvram_handler
+//store pos of bally nvram for later use
+lisy35_cmos_data_t *lisy_by35_CMOS;
+void lisy35_nvram_handler( UINT8 *by35_CMOS_Bally)
+{
+  //remember address for subsequent actions
+  lisy_by35_CMOS = by35_CMOS_Bally;
+}
+
 //handling of nvram via eeprom
 //read_or_write = 0 means read
 //saw never 1 with Bally for write, will be '2' out of cmos routine in by35.c

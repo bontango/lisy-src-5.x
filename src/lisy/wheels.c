@@ -269,7 +269,7 @@ void wheel_score_credits_reset( void )
    //maximum 25 steps
    for(i=1; i<=26; i++)
    {
-     lisy35_switchmatrix_update(); //update internal matrix to detect zero switch
+     lisy35_switchmatrix_update(20); //update internal matrix to detect zero switch
      //pulse down until '0' switch is open
      if ( CHECK_BIT(swMatrixLISY35[7],4)) wheel_pulse_reset_wdelay(11); else break;
    }
@@ -289,60 +289,109 @@ void wheel_score_credits_reset( void )
 }
 
 
-//set all wheels to 'zero' position
+//set all score wheels to 'zero' position
+//new version
 void wheel_score_reset( void )
 {
+ int wheel_is_zero[2][5] = { { 0,0,0,0,0},{ 0,0,0,0,0 } };
+ int i,j,coil,zero_count;
+ int tries = 0;
 
-   int i, check_for_all_zero;
-   int is_zero[2][5] =  {{0,0,0,0,0},{0,0,0,0,0}};
+        //update zero position at start of routine
+        lisy35_switchmatrix_update(1);
+        if ( CHECK_BIT(swMatrixLISY35[6],0 ) == 0 ) wheel_is_zero[0][0] = 1;
+        if ( CHECK_BIT(swMatrixLISY35[6],1 ) == 0 ) wheel_is_zero[0][1] = 1;
+        if ( CHECK_BIT(swMatrixLISY35[6],2 ) == 0 ) wheel_is_zero[0][2] = 1;
+        if ( CHECK_BIT(swMatrixLISY35[6],3 ) == 0 ) wheel_is_zero[0][3] = 1;
+        if ( CHECK_BIT(swMatrixLISY35[6],4 ) == 0 ) wheel_is_zero[0][4] = 1;
+        if ( CHECK_BIT(swMatrixLISY35[8],0 ) == 0 ) wheel_is_zero[1][0] = 1;
+        if ( CHECK_BIT(swMatrixLISY35[8],1 ) == 0 ) wheel_is_zero[1][1] = 1;
+        if ( CHECK_BIT(swMatrixLISY35[8],2 ) == 0 ) wheel_is_zero[1][2] = 1;
+        if ( CHECK_BIT(swMatrixLISY35[8],3 ) == 0 ) wheel_is_zero[1][3] = 1;
+        if ( CHECK_BIT(swMatrixLISY35[8],4 ) == 0 ) wheel_is_zero[1][4] = 1;
+  zero_count = 0;
+  for(i=0; i<=1; i++) {
+        for(j=0; j<=4; j++) {
+		zero_count += wheel_is_zero[i][j];
+	}
+   }
 
-  if ( ls80dbg.bitv.coils )
-  {
-    sprintf(debugbuf,"Wheels: set wheels to zero START");
-    lisy80_debug(debugbuf);
-  }
-
-   //set 5 digits
-   //maximum 9 steps
-   for(i=1; i<=10; i++)
-   {
-     //display1
-     lisy35_switchmatrix_update(); //update internal matrix to detect zero switch
-     if ( CHECK_BIT(swMatrixLISY35[6],0)) wheel_pulse_reset(5); else is_zero[0][0]=1;
-     lisy35_switchmatrix_update(); //update internal matrix to detect zero switch
-     if ( CHECK_BIT(swMatrixLISY35[6],1)) wheel_pulse_reset(6); else is_zero[0][1]=1;
-     lisy35_switchmatrix_update(); //update internal matrix to detect zero switch
-     if ( CHECK_BIT(swMatrixLISY35[6],2)) wheel_pulse_reset(7); else is_zero[0][2]=1;
-     lisy35_switchmatrix_update(); //update internal matrix to detect zero switch
-     if ( CHECK_BIT(swMatrixLISY35[6],3)) wheel_pulse_reset(8); else is_zero[0][3]=1;
-     lisy35_switchmatrix_update(); //update internal matrix to detect zero switch
-     if ( CHECK_BIT(swMatrixLISY35[6],4)) wheel_pulse_reset(9); else is_zero[0][4]=1;
-     //display2
-     lisy35_switchmatrix_update(); //update internal matrix to detect zero switch
-     if ( CHECK_BIT(swMatrixLISY35[8],0)) wheel_pulse_reset(12); else is_zero[1][0]=1;
-     lisy35_switchmatrix_update(); //update internal matrix to detect zero switch
-     if ( CHECK_BIT(swMatrixLISY35[8],1)) wheel_pulse_reset(13); else is_zero[1][1]=1;
-     lisy35_switchmatrix_update(); //update internal matrix to detect zero switch
-     if ( CHECK_BIT(swMatrixLISY35[8],2)) wheel_pulse_reset(14); else is_zero[1][2]=1;
-     lisy35_switchmatrix_update(); //update internal matrix to detect zero switch
-     if ( CHECK_BIT(swMatrixLISY35[8],3)) wheel_pulse_reset(15); else is_zero[1][3]=1;
-     lisy35_switchmatrix_update(); //update internal matrix to detect zero switch
-     if ( CHECK_BIT(swMatrixLISY35[8],4)) wheel_pulse_reset(16); else is_zero[1][4]=1;
-
-
-
-     //extra delay if not all wheels are at zero
-     check_for_all_zero = is_zero[0][0]+is_zero[0][1]+is_zero[0][2]+is_zero[0][3]+is_zero[0][4];
-     check_for_all_zero = check_for_all_zero+is_zero[1][0]+is_zero[1][1]+is_zero[1][2]+is_zero[1][3]+is_zero[1][4];
-     //we need a delay if all but one wheel is at zero
-     if (check_for_all_zero == 9) delay(300);
+ while (zero_count != 10) {
+  //limit number of tries
+  if ( tries++ > 15 )
+        {
+         fprintf(stderr,"maximum tries(15) for wheel zero exceeded");
+  for(i=0; i<=1; i++) {
+        for(j=0; j<=4; j++) {
+   if (  wheel_is_zero[i][j] == 0) printf("wheel %d %d is not zero\n",i,j);
+	   }
+	}
+         break;
         }
+
+  //do all 10 wheels
+  for(i=0; i<=1; i++) {
+        for(j=0; j<=4; j++) {
+
+	//wheel not zero, need to pulse	
+	//fix pulse 60ms, delay 130ms + checktime
+	if ( wheel_is_zero[i][j] == 0 )
+	{
+                  //change state to ON
+                  coil = digit2sol(i, j);
+                  lisyh_coil_set(  lisy_home_ss_special_coil_map[coil].mapped_to_coil, 1);
+	}
+   } //j
+  } // i
+
+  //delay on time 60ms
+  delay(60);
+
+  //do all 10 wheels
+  for(i=0; i<=1; i++) {
+        for(j=0; j<=4; j++) {
+
+        //wheel not zero, need to pulse
+        //fix pulse 60ms, delay 130ms + checktime
+        if ( wheel_is_zero[i][j] == 0 )
+        {
+                  //change state to OFF
+                  coil = digit2sol(i, j);
+                  lisyh_coil_set(  lisy_home_ss_special_coil_map[coil].mapped_to_coil, 0);
+        }
+   } //j
+  } // i
+
+   // 130 milliseconds delay
+   delay(130);
+
+   //now check
+        lisy35_switchmatrix_update(1);
+        if ( CHECK_BIT(swMatrixLISY35[6],0 ) == 0 ) wheel_is_zero[0][0] = 1;
+        if ( CHECK_BIT(swMatrixLISY35[6],1 ) == 0 ) wheel_is_zero[0][1] = 1;
+        if ( CHECK_BIT(swMatrixLISY35[6],2 ) == 0 ) wheel_is_zero[0][2] = 1;
+        if ( CHECK_BIT(swMatrixLISY35[6],3 ) == 0 ) wheel_is_zero[0][3] = 1;
+        if ( CHECK_BIT(swMatrixLISY35[6],4 ) == 0 ) wheel_is_zero[0][4] = 1;
+        if ( CHECK_BIT(swMatrixLISY35[8],0 ) == 0 ) wheel_is_zero[1][0] = 1;
+        if ( CHECK_BIT(swMatrixLISY35[8],1 ) == 0 ) wheel_is_zero[1][1] = 1;
+        if ( CHECK_BIT(swMatrixLISY35[8],2 ) == 0 ) wheel_is_zero[1][2] = 1;
+        if ( CHECK_BIT(swMatrixLISY35[8],3 ) == 0 ) wheel_is_zero[1][3] = 1;
+        if ( CHECK_BIT(swMatrixLISY35[8],4 ) == 0 ) wheel_is_zero[1][4] = 1;
+  zero_count = 0;
+  for(i=0; i<=1; i++) {
+        for(j=0; j<=4; j++) {
+                zero_count += wheel_is_zero[i][j];
+        }
+   }
+
+ }//while not finished
+
 
    //reset postion as well
    for(i=0; i<5; i++) oldpos[0][i] = 0;
    for(i=0; i<5; i++) oldpos[1][i] = 0;
 
-  //set flag 
+  //set flag
   wheel_score_reset_done = 1;
 
   if ( ls80dbg.bitv.coils )
@@ -351,7 +400,9 @@ void wheel_score_reset( void )
     lisy80_debug(debugbuf);
   }
 
+
 }
+
 
 void wheels_show_int( int display, int digit, unsigned char dat)
 {
@@ -578,45 +629,52 @@ void wheel_hstd_set( int w_pulses_needed[][5])
 
 
 //high score today with wheels
-void wheel_hstd(unsigned char ss_hstd_disp[][6], unsigned char ss_game_disp[][6], int sleeptime )
+void wheel_hstd(unsigned char hstd[6], unsigned char player1[6], unsigned char player2[6], int sleeptime )
 {
   int i,j;
   int w_pulses_needed[2][5];
+  unsigned char ss_hstd_disp[2][5];
+  unsigned char ss_game_disp[2][5];
 
+  //we need the first nibble
+  //all counts >9 are interpreted as '0'
+  //rearrange position as it comes little endian
+  for(i=0; i<=4; i++) {
+    ss_hstd_disp[0][i] = hstd[5-i] >> 4; if (ss_hstd_disp[0][i] > 9) ss_hstd_disp[0][i] = 0;
+    ss_hstd_disp[1][i] = hstd[5-i] >> 4; if (ss_hstd_disp[1][i] > 9) ss_hstd_disp[1][i] = 0;
+    ss_game_disp[0][i] = player1[5-i] >> 4; if (ss_game_disp[0][i] > 9) ss_game_disp[0][i] = 0;
+    ss_game_disp[1][i] = player2[5-i] >> 4; if (ss_game_disp[1][i] > 9) ss_game_disp[1][i] = 0;
+  }
 
-  //calculate pulses needed from current score to hstd
+  //set to zero
+  wheel_score_reset();
+
+  //calculate pulses needed from zero hstd
   for(i=0; i<=1; i++) {
         for(j=0; j<=4; j++) {
-        w_pulses_needed[i][j] =  ss_hstd_disp[i][j] - ss_game_disp[i][j];
-	if ( w_pulses_needed[i][j] < 0) w_pulses_needed[i][j] += 10;
+        w_pulses_needed[i][j] =  ss_hstd_disp[i][j];
 	//printf(" %d pulses needed\n",w_pulses_needed[i][j]);
     }
   }
-	//call refresh state machine 
-	wheel_hstd_set( w_pulses_needed );
+
+  //call refresh state machine 
+  wheel_hstd_set( w_pulses_needed );
 	
-	//wait
-	sleep(sleeptime);
-	//calculate pulses needed from hstd to current score ( should be 10-pulses done))
+  //wait
+  sleep(sleeptime);
+
+  //set to zero again
+  wheel_score_reset();
+
+ //calculate pulses needed from zero to current score
   for(i=0; i<=1; i++) {
         for(j=0; j<=4; j++) {
-        w_pulses_needed[i][j] =  ss_game_disp[i][j] - ss_hstd_disp[i][j];
-	if ( w_pulses_needed[i][j] < 0) w_pulses_needed[i][j] += 10;
+        w_pulses_needed[i][j] =  ss_game_disp[i][j];
 	//printf(" %d pulses needed\n",w_pulses_needed[i][j]);
     }
   }
+
 	//call refresh state machine 
 	wheel_hstd_set( w_pulses_needed );
-
-/*
-printf("wheel_hstd called \n");
-for (int i=0; i<=5; i++) printf("%d",ss_hstd_disp[0][i]);
-printf(" ");
-for (int i=0; i<=5; i++) printf("%d",ss_hstd_disp[1][i]);
-printf("\n");
-for (int i=0; i<=5; i++) printf("%d",ss_game_disp[0][i]);
-printf(" ");
-for (int i=0; i<=5; i++) printf("%d",ss_game_disp[1][i]);
-printf("\n");
-*/
 }
+

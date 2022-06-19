@@ -369,36 +369,42 @@ void lisy_home_ss_lamp_event( int lamp, int action)
 	static int hstd_count = 0;
 	switch(lamp)
 	{
-	 case LISY_HOME_SS_LAMP_1CANPLAY: //set light on player1 to ON if 1canplay or 2canplay is ON
+	 case LISY_HOME_SS_LAMP_1CANPLAY: //set light on player1 to ON if 1canplay and 2canplay is OFF, otherwise both ON
 		lisy_home_ss_lamp_1canplay_status = action;
-		if (( lisy_home_ss_lamp_1canplay_status == 1) | ( lisy_home_ss_lamp_2canplay_status ==1))
+		if (( lisy_home_ss_lamp_1canplay_status == 1) & ( lisy_home_ss_lamp_2canplay_status ==0))
 		 {
 		 lisy_home_ss_special_lamp_set ( 15, 1); 
 		 lisy_home_ss_special_lamp_set ( 16, 1); 
+		 lisy_home_ss_special_lamp_set ( 17, 0); 
+		 lisy_home_ss_special_lamp_set ( 18, 0); 
 		 }
 		else
-		 {
-		 lisy_home_ss_special_lamp_set ( 15, 0); 
-		 lisy_home_ss_special_lamp_set ( 16, 0); 
-		 }
- 		break;
-	 case LISY_HOME_SS_LAMP_2CANPLAY: 
-		 lisy_home_ss_lamp_2canplay_status = action;
-		 if ( lisy_home_ss_lamp_2canplay_status ==1)
 		 {
 		 lisy_home_ss_special_lamp_set ( 15, 1); 
 		 lisy_home_ss_special_lamp_set ( 16, 1); 
 		 lisy_home_ss_special_lamp_set ( 17, 1); 
 		 lisy_home_ss_special_lamp_set ( 18, 1); 
 		 }
-		 else
+ 		break;
+	 case LISY_HOME_SS_LAMP_2CANPLAY: //set light on player1 to ON if 1canplay and 2canplay is OFF, otherwise both ON
+		 lisy_home_ss_lamp_2canplay_status = action;
+		if (( lisy_home_ss_lamp_1canplay_status == 1) & ( lisy_home_ss_lamp_2canplay_status ==0))
 		 {
+		 lisy_home_ss_special_lamp_set ( 15, 1); 
+		 lisy_home_ss_special_lamp_set ( 16, 1); 
 		 lisy_home_ss_special_lamp_set ( 17, 0); 
 		 lisy_home_ss_special_lamp_set ( 18, 0); 
 		 }
+		else
+		 {
+		 lisy_home_ss_special_lamp_set ( 15, 1); 
+		 lisy_home_ss_special_lamp_set ( 16, 1); 
+		 lisy_home_ss_special_lamp_set ( 17, 1); 
+		 lisy_home_ss_special_lamp_set ( 18, 1); 
+		 }
  		break;
 	 case LISY_HOME_SS_LAMP_GAMEOVER: 
-		 if ( action == 1)
+		 if ( action == 1)  //end of game
 			{
 			  //stop background sound
  			  if ( lisy_env.has_own_sounds ) Mix_HaltChannel(202);
@@ -441,6 +447,7 @@ void lisy_home_ss_lamp_event( int lamp, int action)
 		}
  		break;
 	}
+
 }
 
 //things we want to do early after boot
@@ -455,6 +462,12 @@ void lisy_home_ss_boot_event(int arg1)
 void lisy_home_ss_init_event(void)
 {
  int i;
+
+ //activate scoring lights
+ lisy_home_ss_special_lamp_set ( 15, 1); 
+ lisy_home_ss_special_lamp_set ( 16, 1); 
+ lisy_home_ss_special_lamp_set ( 17, 1); 
+ lisy_home_ss_special_lamp_set ( 18, 1); 
 
  //reset credit wheels
  wheel_score_credits_reset();

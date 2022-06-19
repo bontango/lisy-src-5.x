@@ -403,14 +403,17 @@ void lisy_home_ss_lamp_event( int lamp, int action)
 			  //stop background sound
  			  if ( lisy_env.has_own_sounds ) Mix_HaltChannel(202);
 			  lisy_game_running = 0;
-			  //reset hstd count
-			  hstd_count = 0;
 			}
 		else 
+			//start off game
 			{
  			   //fix setting RTH //Start play background
 	   	  	   if ( lisy_env.has_own_sounds ) StarShip_play_wav(202);
 			  lisy_game_running = 1;
+			  //deactivate special lamp hstd
+		 	  lisy_home_ss_special_lamp_set ( 22, 0); 
+			  //reset hstd count
+			  hstd_count = 0;
 			}
  		break;
 	 case LISY_HOME_SS_LAMP_HSTD: 

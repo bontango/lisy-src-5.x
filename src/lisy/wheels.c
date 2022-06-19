@@ -145,16 +145,17 @@ void wheels_refresh(void)
 		//only activate if state from mom solenoids is safe
 		if ( lisy35_mom_solenoid_status_safe != 1) break;
 
+		//complete round is not needed
+		while ( wheel_pulses_needed[i][j] >= 10 ) 
+		{
+		    wheel_pulses_needed[i][j] -= 10;
+		}
+
 		if ( wheel_pulses_needed[i][j] > 0) //do we need to pulse?
 		 {
 		  //yes store pulse and delay time for this digit
 		  //decrement puls couinter and change state to ON
-		  if ( wheel_pulses_needed[i][j] >= 10 )  //complete round is not needed
-		   {
-		    wheel_pulses_needed[i][j] -= 10;
-		    if ( wheel_pulses_needed[i][j] == 0 ) break;
-		   }
-		  else { wheel_pulses_needed[i][j] -= 1; }
+		  wheel_pulses_needed[i][j] -= 1;
 		  coil = digit2sol(i, j);
 		  lisyh_coil_set(  lisy_home_ss_special_coil_map[coil].mapped_to_coil, 1);
 		  pulse_time[i][j] = lisy_home_ss_special_coil_map[coil].pulsetime;
@@ -437,7 +438,7 @@ void wheels_show_int( int display, int digit, unsigned char dat, unsigned char a
 		 newcredits = 10 * oldpos_credit[1] + oldpos_credit[0];
 	  	 pulses = newcredits - oldcredits;
 		 //set local var for pulses needed
-		 //will becoming active with wheel_refresh via lisy35_throtle
+		 //will becoming active with wheels_refresh via lisy35_throtle
 		 wheel_pulses_credits_needed += pulses;
 		 if ( ls80dbg.bitv.coils )
   		 {
@@ -471,7 +472,8 @@ void wheels_show_int( int display, int digit, unsigned char dat, unsigned char a
         if (  pulses > 0 )  pulses = abs( 10 -  pulses);
         if (  pulses < 0 )  pulses = abs( pulses);
 
-	if ( ls80dbg.bitv.displays )
+	//if ( ls80dbg.bitv.displays )
+	if ( 1 )
   	{
 	  sprintf(debugbuf,"wheels_show_int: display:%d digit:%d dat:%d (old dat%d   %d pulses needed)\n",display,digit,dat, oldpos[display][digit],pulses);
     	  lisy80_debug(debugbuf);
@@ -481,7 +483,7 @@ void wheels_show_int( int display, int digit, unsigned char dat, unsigned char a
         oldpos[display][digit] = pos[display][digit];
 
 	//set local var for pulses needed
-	//will becoming active with wheel_refresh via lisy35_throtle
+	//will becoming active with wheels_refresh via lisy35_throtle
 	wheel_pulses_needed[display][digit] += pulses;
 
     }//flipper enabled?

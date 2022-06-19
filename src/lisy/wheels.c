@@ -404,7 +404,7 @@ void wheel_score_reset( void )
 }
 
 
-void wheels_show_int( int display, int digit, unsigned char dat)
+void wheels_show_int( int display, int digit, unsigned char dat, unsigned char attract_mode)
 {
 
    int i;
@@ -457,7 +457,8 @@ void wheels_show_int( int display, int digit, unsigned char dat)
    if ( digit > 6 ) return;
 
 
-   if ( lisy35_flipper_disable_status == 0) //flipper enabled?
+   //flipper enabled or atract mode(hstd)?
+   if (( lisy35_flipper_disable_status == 0) | ( attract_mode == 1))
      {
 	//adjust numbers
 	display--;
@@ -556,6 +557,7 @@ void wheel_score( int display, char *data)
 }
 
 //set the wheel for HSTD
+//RTH OLD
 void wheel_hstd_set( int w_pulses_needed[][5])
 {
  int wheel_state[2][5] = { { 0,0,0,0,0},{ 0,0,0,0,0 } };
@@ -629,6 +631,45 @@ void wheel_hstd_set( int w_pulses_needed[][5])
 
 
 //high score today with wheels
+void wheel_set_hstd(unsigned char hstd[6] )
+{
+  int i;
+  unsigned char ss_hstd_disp[2][5];
+
+ //we need the first nibble
+  //all counts >9 are interpreted as '0'
+  //rearrange position as it comes little endian
+  for(i=0; i<=4; i++) {
+    ss_hstd_disp[0][i] = hstd[5-i] >> 4; if (ss_hstd_disp[0][i] > 9) ss_hstd_disp[0][i] = 0;
+    ss_hstd_disp[1][i] = hstd[5-i] >> 4; if (ss_hstd_disp[1][i] > 9) ss_hstd_disp[1][i] = 0;
+    //show with show_int routine attract_mode = 1 ( display+1 digit+2)
+    wheels_show_int( 1, i+2, ss_hstd_disp[0][i], 1);
+    wheels_show_int( 2, i+2, ss_hstd_disp[1][i], 1);
+  }
+
+}
+
+void wheel_set_score(unsigned char player1[6], unsigned char player2[6] )
+{
+  int i;
+  unsigned char ss_game_disp[2][5];
+
+ //we need the first nibble
+  //all counts >9 are interpreted as '0'
+  //rearrange position as it comes little endian
+  for(i=0; i<=4; i++) {
+    ss_game_disp[0][i] = player1[5-i] >> 4; if (ss_game_disp[0][i] > 9) ss_game_disp[0][i] = 0;
+    ss_game_disp[1][i] = player2[5-i] >> 4; if (ss_game_disp[1][i] > 9) ss_game_disp[1][i] = 0;
+    //show with show_int routine attract_mode = 1 ( display+1 digit+2)
+    wheels_show_int( 1, i+2, ss_game_disp[0][i], 1);
+    wheels_show_int( 2, i+2, ss_game_disp[1][i], 1);
+  }
+
+}
+
+
+//high score today with wheels
+//RTH OLD
 void wheel_hstd(unsigned char hstd[6], unsigned char player1[6], unsigned char player2[6], int sleeptime )
 {
   int i,j;

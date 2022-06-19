@@ -319,7 +319,6 @@ void lisy_home_ss_display_event( int digit, int value, int display)
     static int old_ballinplay_status = -1;
     static int old_match_status = -1;
     static int old_credit_status = -1;
-    static int hstd_first = 1;
 
 	//printf("display event: display:%d digit:%d value:%d\n",display,digit,value);
 
@@ -415,15 +414,28 @@ void lisy_home_ss_lamp_event( int lamp, int action)
 			}
  		break;
 	 case LISY_HOME_SS_LAMP_HSTD: 
+		//only if cycle parameter in ss_general_parms.csv is > 0
+	       if ( lisy_home_ss_general.hstd_cycle > 0)
+		{	
 		//count the events
 		if (action) hstd_count++;
-		if ( hstd_count > lisy_home_ss_general.hstd_cycle)
+		if ( hstd_count == lisy_home_ss_general.hstd_cycle)
 			{
-			hstd_count = 0;
-			wheel_hstd( lisy_by35_CMOS->para.hstd,
-					 lisy_by35_CMOS->para.disp1_backup, lisy_by35_CMOS->para.disp2_backup,
-					 lisy_home_ss_general.hstd_sleep );
+			  //show high score to date
+			  wheel_set_hstd( lisy_by35_CMOS->para.hstd);
+			  //activate special lamp hstd
+		 	  lisy_home_ss_special_lamp_set ( 22, 1); 
 			}
+		else if ( hstd_count == (lisy_home_ss_general.hstd_sleep + lisy_home_ss_general.hstd_cycle))
+			{
+			  //reset counts
+			  hstd_count = 0;
+			  //show score attract mode
+			  wheel_set_score( lisy_by35_CMOS->para.disp1_backup, lisy_by35_CMOS->para.disp2_backup);
+			  //deactivate special lamp hstd
+		 	  lisy_home_ss_special_lamp_set ( 22, 0); 
+			}
+		}
  		break;
 	}
 }

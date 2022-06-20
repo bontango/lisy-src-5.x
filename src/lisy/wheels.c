@@ -472,8 +472,7 @@ void wheels_show_int( int display, int digit, unsigned char dat, unsigned char a
         if (  pulses > 0 )  pulses = abs( 10 -  pulses);
         if (  pulses < 0 )  pulses = abs( pulses);
 
-	//if ( ls80dbg.bitv.displays )
-	if ( 1 )
+	if ( ls80dbg.bitv.displays )
   	{
 	  sprintf(debugbuf,"wheels_show_int: display:%d digit:%d dat:%d (old dat%d   %d pulses needed)\n",display,digit,dat, oldpos[display][digit],pulses);
     	  lisy80_debug(debugbuf);

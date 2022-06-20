@@ -409,6 +409,11 @@ void lisy_home_ss_lamp_event( int lamp, int action)
 			  //stop background sound
  			  if ( lisy_env.has_own_sounds ) Mix_HaltChannel(202);
 			  lisy_game_running = 0;
+			  //activate scoring lights
+			  lisy_home_ss_special_lamp_set ( 15, 1);
+			  lisy_home_ss_special_lamp_set ( 16, 1);
+			  lisy_home_ss_special_lamp_set ( 17, 1);
+			  lisy_home_ss_special_lamp_set ( 18, 1);
 			}
 		else 
 			//start off game

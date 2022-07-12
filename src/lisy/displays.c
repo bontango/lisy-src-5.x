@@ -970,3 +970,21 @@ void lisy35_display_set_variant( unsigned char variant)
 	}
 }
 
+/* 
+send a string to Starship LCD
+20 bytes, first byte is row (0==row 1)
+*/
+void display_ss_LCD_string2row(unsigned char row, char *buf)
+{
+        /* build control byte */
+        mydata_display.bitv.IS_CMD = 1;        //we are sending a command here
+
+	mydata_display.bitv.COMMAND_BYTE = LSH_SS_DPCMD_STRING2ROW; 
+       	//write command to PIC
+       	lisy80_write_byte_disp_pic( mydata_display.byte );
+	//LCD row is first byte
+       	lisy80_write_byte_disp_pic( row );
+       	//write data to PIC
+       	lisy80_write_multibyte_disp_pic( buf, 20 );
+  return;
+}

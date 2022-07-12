@@ -75,6 +75,7 @@ void lisy35_ss_init( void )
  int i,sb,dip_value;
  char s_lisy_software_version[16];
  unsigned char sw_main,sw_sub,commit;
+ char infostr[25];
 
  //set signal handler
  lisy80_set_sighandler();
@@ -189,6 +190,9 @@ if ( lisy35_has_own_sounds )
  //read the dip setting
  dip_value = display_get_ss_dipsw_value();
  fprintf(stderr,"Info: Starship: Dip setting is %d\n",dip_value);
+ //send string to LCD
+ sprintf(infostr,"DIP setting is:%02d   ",dip_value);
+ display_ss_LCD_string2row(3, infostr);
  //prepare value for mapping (0..3)
  dip_value = dip_value /4;
 

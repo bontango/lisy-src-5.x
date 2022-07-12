@@ -710,6 +710,8 @@ if (ret < 80) //ret is switchnumber
         {
            sprintf(debugbuf,"LISY35_SWITCH_READER Switch#:%d strobe:%d return:%d action:%d\n",ret+1,strobe,returnval,action);
            lisy80_debug(debugbuf);
+
+	   lisy80_debug_swreplay( ret+1, action);
         }
   } //if ret < 80 => update internal matrix
 

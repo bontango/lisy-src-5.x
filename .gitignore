@@ -3,6 +3,8 @@ xpinmame.vid_lisy
 a.out
 *.o
 src/lisy/testprogs/get_dip_from_S1/get_dip_from_S1
+src/lisy/testprogs/i2c/getS2fromdPIC
+src/lisy/testprogs/i2c/getdip4andS2
 src/lisy/testprogs/i2c/lisy_check
 src/lisy/control/lisy1_control
 src/lisy/control/lisy80_control

@@ -1,0 +1,16 @@
+# lisy80 Makefile
+# RTH 07.2022
+# for getS2fromdPIC.c
+
+CC      = /usr/bin/gcc
+CFLAGS  = -Wall -g -D_REENTRANT -DDEBUG
+LDFLAGS = -lwiringPi  -li2c
+
+OBJ = getS2fromdPIC.o
+
+getS2fromdPIC: $(OBJ)
+	$(CC) $(CFLAGS) -o getS2fromdPIC $(OBJ) $(LDFLAGS)
+
+%.o: ../%.c ../%.h
+	$(CC) $(CFLAGS) -c $<
+

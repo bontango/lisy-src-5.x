@@ -1481,8 +1481,12 @@ void lisy35_solenoid_handler(unsigned char data, unsigned char soundselect)
     lisy35_mom_coil_set(moment_data);
     if ( ls80dbg.bitv.coils )
      {
-       sprintf(debugbuf,"momentary solenoids: %d",moment_data);
-       lisy80_debug(debugbuf);
+      if( moment_data == 15)
+       { sprintf(debugbuf,"momentary solenoids OFF"); }
+      else
+       { sprintf(debugbuf,"momentary solenoids: %d",moment_data + 1); }
+
+      lisy80_debug(debugbuf);
      }
 
     //running on Starship?

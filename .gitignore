@@ -6,6 +6,7 @@ src/lisy/testprogs/get_dip_from_S1/get_dip_from_S1
 src/lisy/testprogs/i2c/getS2fromdPIC
 src/lisy/testprogs/i2c/getdip4andS2
 src/lisy/testprogs/i2c/lisy_check
+src/lisy/testprogs/switches/lisy_swreplay
 src/lisy/control/lisy1_control
 src/lisy/control/lisy80_control
 src/lisy/control/lisy35_control

@@ -1448,24 +1448,27 @@ void lisy35_solenoid_handler(unsigned char data, unsigned char soundselect)
     //debug?
     if (  ls80dbg.bitv.coils )
     {
-         if( CHECK_BIT( cont_data, 3) && !CHECK_BIT( old_cont_data, 3))
-             lisy80_debug("bit 3 set to 1");
-         if( !CHECK_BIT( cont_data, 3) && CHECK_BIT( old_cont_data, 3))
-             lisy80_debug("bit 3 set to 0");
-         if( CHECK_BIT( cont_data, 2) && !CHECK_BIT( old_cont_data, 2))
-             lisy80_debug("flipper disabled");
-         if( !CHECK_BIT( cont_data, 2) && CHECK_BIT( old_cont_data, 2))
-             lisy80_debug("flipper enabled");
-         if( CHECK_BIT( cont_data, 1) && !CHECK_BIT( old_cont_data, 1))
-             lisy80_debug("coin lockout ON");
-         if( !CHECK_BIT( cont_data, 1) && CHECK_BIT( old_cont_data, 1))
-             lisy80_debug("coin lockout OFF");
-         if( CHECK_BIT( cont_data, 0) && !CHECK_BIT( old_cont_data, 0))
-             lisy80_debug("bit 0 set to 1");
-         if( !CHECK_BIT( cont_data, 0) && CHECK_BIT( old_cont_data, 0))
-             lisy80_debug("bit 0 set to 0");
+         if( CHECK_BIT( cont_data, 3) != CHECK_BIT( old_cont_data, 3))
+	  {
+		 if( CHECK_BIT( cont_data, 3)) lisy80_debug("cont sol changed: bit 3 set to 1");
+		 else lisy80_debug("cont sol changed: bit 3 set to 0");
+	  }
+         if( CHECK_BIT( cont_data, 2) != CHECK_BIT( old_cont_data, 2))
+	  {
+		 if( CHECK_BIT( cont_data, 2)) lisy80_debug("cont sol changed: flipper disabled");
+		 else lisy80_debug("cont sol changed: flipper enabled");
+	  }
+         if( CHECK_BIT( cont_data, 1) != CHECK_BIT( old_cont_data, 1))
+	  {
+		 if( CHECK_BIT( cont_data, 1)) lisy80_debug("cont sol changed: coin lockout ON");
+		 else lisy80_debug("cont sol changed: coin lockout OFF");
+	  }
+         if( CHECK_BIT( cont_data, 0) != CHECK_BIT( old_cont_data, 0))
+	  {
+		 if( CHECK_BIT( cont_data, 0)) lisy80_debug("cont sol changed: bit 0 set to 1");
+		 else lisy80_debug("cont sol changed: bit 0 set to 0");
+	  }
     }
-
 
     old_cont_data = cont_data;
     //send to PIC

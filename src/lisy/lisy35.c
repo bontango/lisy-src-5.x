@@ -662,7 +662,7 @@ if ( ( ls80dbg.bitv.basic ) & ( ret == 80))
  {
    if ( ( ret = lisy_udp_switch_reader( &action, 0 )) != 80)
    {
-     sprintf(debugbuf,"LISY35_SWITCH_READER (UDP Server Data received: %d",ret);
+     sprintf(debugbuf,"LISY35 Switch_reader: (UDP Server Data received: %d",ret);
      lisy80_debug(debugbuf);
      //we start internally with 0, so substract one
      --ret;
@@ -683,7 +683,7 @@ if ( ( ret == 5 ) & (action == 1))
 
         if ( ls80dbg.bitv.switches )
         {
-           lisy80_debug("LISY35_SWITCH_READER: Ball one AND 2canplay activ: credit ignored");
+           lisy80_debug("LISY35 Switch_reader: Ball one AND 2canplay activ: credit ignored");
         }
   }
 }
@@ -706,6 +706,7 @@ if (ret < 80) //ret is switchnumber
         else  //delete bit
                    CLEAR_BIT(swMatrixLISY35[strobe+1],returnval);
 
+/*
         if ( ls80dbg.bitv.switches )
         {
            sprintf(debugbuf,"LISY35_SWITCH_READER Switch#:%d strobe:%d return:%d action:%d\n",ret+1,strobe,returnval,action);
@@ -713,6 +714,8 @@ if (ret < 80) //ret is switchnumber
 
 	   lisy80_debug_swreplay( ret+1, action);
         }
+debug done in switches.c */
+
   } //if ret < 80 => update internal matrix
 
 //do we need a 'special' routine to handle that switch?

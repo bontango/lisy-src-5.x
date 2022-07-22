@@ -642,10 +642,29 @@ unsigned char lisy35_switch_handler( int sys35col )
 int ret;
 unsigned char strobe,returnval,action;
 static int simulate_coin_flag = 0;
+static int first = 1;
+unsigned int now;
+int sleeptime;
+static unsigned int last;
+int sys35strobe = 1;
 
+if (first)
+ {
+  first = 0;
+  //store start time first, which is number of microseconds since wiringPiSetup (wiringPI lib)
+  last = micros();
+  return(swMatrixLISY35[sys35strobe]);
+ }
+
+ //see how many micros passed
+  now = micros();
+ //if we had a wrap or last update is less then 50ms (50 000) return
+ if ( (now-last) < 50000) return(swMatrixLISY35[sys35strobe]);
+
+ //time past, store now as last
+ last = now;
 
 //get the truth strobe
-  int sys35strobe = 1;
   if (sys35col) {
     while ((sys35col & 0x01) == 0) {
       sys35col >>= 1;

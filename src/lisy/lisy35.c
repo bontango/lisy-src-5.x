@@ -642,14 +642,8 @@ unsigned char lisy35_switch_handler( int sys35col )
 int ret;
 unsigned char strobe,returnval,action;
 static int simulate_coin_flag = 0;
-static int first = 1;
 int sys35strobe = 1;
 
-if (first)
- {
-  first = 0;
-  return(swMatrixLISY35[sys35strobe]);
- }
 
 //get the truth strobe
   if (sys35col) {
@@ -711,16 +705,6 @@ if (ret < 80) //ret is switchnumber
                    SET_BIT(swMatrixLISY35[strobe+1],returnval);
         else  //delete bit
                    CLEAR_BIT(swMatrixLISY35[strobe+1],returnval);
-
-/*
-        if ( ls80dbg.bitv.switches )
-        {
-           sprintf(debugbuf,"LISY35_SWITCH_READER Switch#:%d strobe:%d return:%d action:%d\n",ret+1,strobe,returnval,action);
-           lisy80_debug(debugbuf);
-
-	   lisy80_debug_swreplay( ret+1, action);
-        }
-debug done in switches.c */
 
   } //if ret < 80 => update internal matrix
 

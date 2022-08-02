@@ -2292,3 +2292,61 @@ int  lisy_file_get_home_ss_general(void)
  
  return 0;
 }
+
+//read the csv file for lisy Home Starship org sound to coil mapping /lisy partition
+//give -1 in case we had an error
+//fill structure 
+int  lisy_file_get_home_ss_sound_mappings(int variant)
+{
+ char buffer[1024];
+ char *line;
+ char file_name[80];
+ int no;
+ int is_coil;
+ int first_line = 1;
+ FILE *fstream;
+ int i,dum;
+
+//map to default no mapping / no activation
+for(i=0; i<5;i++) 
+  { 
+     lisy_home_ss_sound_map[i].mapped_to_coil = 0;
+  }
+
+//COILS construct the filename
+//coil ;coil Number;Comment
+//do we use a variant for testing?
+if (variant > 0)
+   sprintf(file_name,"%s%s_%02d.csv",LISYH_MAPPING_PATH,LISYH_SS_SOUND_MAPPING_FILE,variant);
+else
+   sprintf(file_name,"%s%s.csv",LISYH_MAPPING_PATH,LISYH_SS_SOUND_MAPPING_FILE);
+
+ fstream = fopen(file_name,"r");
+  if(fstream == NULL)
+  {
+      fprintf(stderr,"LISY_Home: opening %s failed, using defaults for sound\n",file_name);
+  }
+  else
+  {
+   first_line = 1;
+   fprintf(stderr,"LISY_Home: reading %s for sound mapping\n",file_name);
+   while( (line=fgets(buffer,sizeof(buffer),fstream))!=NULL)
+   {
+     if (first_line) { first_line=0; continue; } //skip first line (Header)
+     no = atoi(strtok(line, ";")); 	//sound number
+     if ( no > 5 ) continue; //skip line if sound number is out of range
+     lisy_home_ss_sound_map[no].mapped_to_coil = atoi(strtok(NULL, ";")); 
+  //debug
+  if ( ls80dbg.bitv.sound )
+  {
+    sprintf(debugbuf,"LISY HOME:  map sound %d to number:%d",no,lisy_home_ss_sound_map[no].mapped_to_coil);
+    lisy80_debug(debugbuf);
+  }
+
+   } //while
+   fclose(fstream);
+  }
+
+ return 0;
+}
+

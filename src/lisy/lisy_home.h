@@ -45,6 +45,8 @@ t_lisy_home_ss_lamp_map;
 
 void lisy_home_ss_lamp_set( int lamp, int action);
 void lisy_home_ss_special_lamp_set( int lamp, int action);
+void lisy_home_ss_lamp_set_colorcode(int lamp, unsigned char red, unsigned char green,unsigned char blue,unsigned char white);
+void lisy_home_ss_set_sound_mode( int mode, int action);
 
 //new starship, old one (tom&Jerry) to be adapted
 typedef struct
@@ -89,6 +91,12 @@ typedef struct
 }
 t_lisy_home_ss_general;
 
+//starship sound
+typedef struct
+{
+  int mapped_to_coil;
+}
+t_lisy_home_ss_sound_map;
 
 void lisy_home_ss_mom_coil_set( unsigned char value);
 void lisy_home_ss_cont_coil_set( unsigned char cont_data);
@@ -127,6 +135,11 @@ void lisy_home_ss_event_handler( int id, int arg1, int arg2, int arg3);
 #define LISY_HOME_DIGIT_MATCH 6
 #define LISY_HOME_DIGIT_BALLINPLAY 7
 
+//sound output on Starship
+#define LISY_HOME_SS_SOUND_NONE 0
+#define LISY_HOME_SS_SOUND_PHAT 1
+#define LISY_HOME_SS_SOUND_ORG 2
+#define LISY_HOME_SS_SOUND_CHIMES 3
 
 #endif  /* LISY_HOME_H */
 

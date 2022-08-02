@@ -210,6 +210,8 @@ if ( lisy35_has_own_sounds )
  lisy_home_ss_send_led_colors();
  //read the csv file for Starship general parameters
   lisy_file_get_home_ss_general();
+ //read sound mapping
+ lisy_file_get_home_ss_sound_mappings(dip_value);
 
 
  //deactivate all special solenoids with a mapping
@@ -1609,8 +1611,8 @@ unsigned char sound_E;
      if ( lisy35_has_own_sounds )
 	   lisy35_play_wav(16*last_sound_E + data);
      //Starship? inform even handler
-     if ( StarShip_has_own_sounds )
-     	   	lisy_home_ss_event_handler(LISY_HOME_SS_EVENT_SOUND,16*last_sound_E + data,0,0);
+     //if ( StarShip_has_own_sounds ) -> decision made in lisy_home.c
+     lisy_home_ss_event_handler(LISY_HOME_SS_EVENT_SOUND,16*last_sound_E + data,0,0);
      //debug?
      if ( ls80dbg.bitv.sound )
       {

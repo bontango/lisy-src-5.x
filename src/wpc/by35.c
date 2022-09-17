@@ -414,8 +414,10 @@ static void adjust_timer(int offset) {
   }
 }
 #endif /* BY35_DEBUG_KEY_SUPPORT */
-
 static SWITCH_UPDATE(by35) {
+#ifdef LISY_SUPPORT
+  lisy35_switch_update();
+#endif
 #if BY35_DEBUG_KEY_SUPPORT
   if      (keyboard_pressed_memory_repeat(KEYCODE_Z, 2))
     adjust_timer(-0x10);

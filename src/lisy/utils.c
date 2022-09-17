@@ -136,6 +136,8 @@ void lisy_init( void )
    }
 }//K3 value
 
+//init Buffer
+LISY_SW_BufferInit();
 
   //do system specific init
   fprintf(stderr,"Info: internal Hardware revision is %d\n",lisy_hardware_revision);
@@ -214,46 +216,50 @@ void lisy80_sig_handler(int signo)
 
 // FIFO Handling
 // used for switches 
+// extended to 8 columns
 
-/* FIRST BUFFER  */
-#define LISY80_BUFFER_SIZE 128
+/* BUFFER Para  */
+#define LISY_SW_BUFFER_NUM 8
+#define LISY_SW_BUFFER_SIZE 128
 
-struct Buffer {
-  unsigned char data[LISY80_BUFFER_SIZE];
-  unsigned char read; // zeigt auf das Feld mit dem äesten Inhalt
-  unsigned char write; // zeigt immer auf leeres Feld
-} LISY80_buffer;
+struct t_LISY_SW_buffer {
+  unsigned char data[LISY_SW_BUFFER_SIZE];
+  unsigned char read; // points to next data
+  unsigned char write; // points always to empty data
+} LISY_SW_buffer[LISY_SW_BUFFER_NUM];
 
 
 //
 // initialisiert den Buffer
 //
-void LISY80_BufferInit(void)
+void LISY_SW_BufferInit(void)
 {
-  LISY80_buffer.read = LISY80_buffer.write = 0;
+  int i;
+  for(i=0; i<LISY_SW_BUFFER_NUM; i++)
+  	LISY_SW_buffer[i].read = LISY_SW_buffer[i].write = 0;
 }
 
 //
 // Stellt 1 Byte in den Ringbuffer
 //
 // Returns:
-//     LISY80_BUFFER_FAIL       der Ringbuffer ist voll. Es kann kein weiteres Byte gespeichert werden
-//     LISY80_BUFFER_SUCCESS    das Byte wurde gespeichert
+//     LISY_SW_BUFFER_FAIL       der Ringbuffer ist voll. Es kann kein weiteres Byte gespeichert werden
+//     LISY_SW_BUFFER_SUCCESS    das Byte wurde gespeichert
 //
-unsigned char LISY80_BufferIn(unsigned char byte)
+unsigned char LISY_SW_BufferIn(int index, unsigned char byte)
 {
 
-  if ( ( LISY80_buffer.write + 1 == LISY80_buffer.read ) ||
-       ( LISY80_buffer.read == 0 && LISY80_buffer.write + 1 == LISY80_BUFFER_SIZE ) )
-    return LISY80_BUFFER_FAIL; // voll
+  if ( ( LISY_SW_buffer[index].write + 1 == LISY_SW_buffer[index].read ) ||
+       ( LISY_SW_buffer[index].read == 0 && LISY_SW_buffer[index].write + 1 == LISY_SW_BUFFER_SIZE ) )
+    return LISY_SW_BUFFER_FAIL; // voll
 
-  LISY80_buffer.data[LISY80_buffer.write] = byte;
+  LISY_SW_buffer[index].data[LISY_SW_buffer[index].write] = byte;
 
-  LISY80_buffer.write++;
-  if (LISY80_buffer.write >= LISY80_BUFFER_SIZE)
-    LISY80_buffer.write = 0;
+  LISY_SW_buffer[index].write++;
+  if (LISY_SW_buffer[index].write >= LISY_SW_BUFFER_SIZE)
+    LISY_SW_buffer[index].write = 0;
 
-  return LISY80_BUFFER_SUCCESS;
+  return LISY_SW_BUFFER_SUCCESS;
 }
 //
 // Holt 1 Byte aus dem Ringbuffer, sofern mindestens eines abholbereit ist
@@ -262,18 +268,18 @@ unsigned char LISY80_BufferIn(unsigned char byte)
 //     LISY80_BUFFER_FAIL       der Ringbuffer ist leer. Es kann kein Byte geliefert werden.
 //     LISY80_BUFFER_SUCCESS    1 Byte wurde geliefert
 //
-unsigned char LISY80_BufferOut(unsigned char *pByte)
+unsigned char LISY_SW_BufferOut(int index, unsigned char *pByte)
 {
-  if (LISY80_buffer.read == LISY80_buffer.write)
-    return LISY80_BUFFER_FAIL;
+  if (LISY_SW_buffer[index].read == LISY_SW_buffer[index].write)
+    return LISY_SW_BUFFER_FAIL;
 
-  *pByte = LISY80_buffer.data[LISY80_buffer.read];
+  *pByte = LISY_SW_buffer[index].data[ LISY_SW_buffer[index].read];
 
-  LISY80_buffer.read++;
-  if (LISY80_buffer.read >= LISY80_BUFFER_SIZE)
-    LISY80_buffer.read = 0;
+  LISY_SW_buffer[index].read++;
+  if (LISY_SW_buffer[index].read >= LISY_SW_BUFFER_SIZE)
+    LISY_SW_buffer[index].read = 0;
 
-  return LISY80_BUFFER_SUCCESS;
+  return LISY_SW_BUFFER_SUCCESS;
 }
 
 //calculates parity for 8 bit

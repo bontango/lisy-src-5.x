@@ -15,9 +15,9 @@ void syserr( char *msg, int number, int doexit);
 void lisy80_set_sighandler(void);
 void lisy80_sig_handler(int signo);
 
-void LISY80_BufferInit(void);
-unsigned char LISY80_BufferIn(unsigned char byte);
-unsigned char LISY80_BufferOut(unsigned char *pByte);
+void LISY_SW_BufferInit(void);
+unsigned char LISY_SW_BufferIn(int index, unsigned char byte);
+unsigned char LISY_SW_BufferOut(int index, unsigned char *pByte);
 unsigned char parity( unsigned char val );
 
 int lisy_timer( unsigned int duration, int command, int index);
@@ -30,8 +30,8 @@ void lisy_logger(void);
 
 
 
-#define LISY80_BUFFER_FAIL     0
-#define LISY80_BUFFER_SUCCESS  1
+#define LISY_SW_BUFFER_FAIL     0
+#define LISY_SW_BUFFER_SUCCESS  1
 
 //
 //some bit settings routines

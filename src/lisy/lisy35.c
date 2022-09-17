@@ -43,10 +43,11 @@ unsigned char lisy35_has_own_sounds = 0;  //play own sounds rather then usinig p
 unsigned char StarShip_has_own_sounds = 0;  //play StarShip sounds
 t_stru_lisy35_sounds_csv lisy35_sound_stru[256];
 
-//internal switch Matrix for system1, we need 7 elements
+//internal switch Matrix for system1, we need 9 elements
 //as pinmame internal starts with 1
 //swMatrix 6 for SLAM and other special switches
-unsigned char swMatrixLISY35[9] = { 0,0,0,0,0,0,0,0,0 };
+unsigned char swMatrixLISY35[9] = { 0,0,0,0,0,0,0,0,0 };   //pinmame view
+unsigned char swMatrixLISY35PIC[9] = { 0,0,0,0,0,0,0,0,0 }; //PIC view
 
 //for special cases, where pins are doings strobes
 //we need to be aware and filter out
@@ -633,82 +634,30 @@ if ( ls80dbg.bitv.displays )
 
 
 /*
-  switch handler
-  give back the value of the pinmame Matrix byte
-  swMatrix[0] is pinmame internal (sound?)
-  swMatrix[1..6] is bally,
-  swMatrix[7] is  'special switches' bit7:Test; bit6:S33;
+  switch update
+  called from by35.c appr. each 20ms
+  update internal view to pinmame view
 */
-unsigned char lisy35_switch_handler( int sys35col )
+void lisy35_switch_update(void)
 {
-int ret;
-unsigned char strobe,returnval,action;
+unsigned char lisy_switch;
+int sys35strobe;
 static int simulate_coin_flag = 0;
-int sys35strobe = 1;
 
-
-//get the truth strobe
-  if (sys35col) {
-    while ((sys35col & 0x01) == 0) {
-      sys35col >>= 1;
-      sys35strobe += 1;
-    }
-  }
-
-//read values from pic
-//check if there is an update first
-ret = lisy35_switch_reader( &action );
-//if debug mode is set we get our reedings from udp switchreader in additon
-//but do not overwrite real switches
-if ( ( ls80dbg.bitv.basic ) & ( ret == 80)) 
+//pull matrixbytes for all strobes
+//and update internal matrix
+ for(sys35strobe=0; sys35strobe<9; sys35strobe++)
  {
-   if ( ( ret = lisy_udp_switch_reader( &action, 0 )) != 80)
-   {
-     sprintf(debugbuf,"LISY35 Switch_reader: (UDP Server Data received: %d",ret);
-     lisy80_debug(debugbuf);
-     //we start internally with 0, so substract one
-     --ret;
-   }
- }
-
- //running on Starship? switchnumber has to be increased
- if (( lisy_hardware_revision == 200 ) & ( ret != 80 ))
-		 lisy_home_ss_event_handler( LISY_HOME_SS_EVENT_SWITCH, ret+1, action, 0);
-
-//ignore credit switch if we running on Starship
-//and 2canplay lamp is ON
-if ( ( ret == 5 ) & (action == 1))
-{
-  if ( ( lisy_hardware_revision == 200 ) & ( lisy_home_ss_ignore_credit == 1))
-  {
-	ret = 80;
-
+  if ( ( LISY_SW_BufferOut( sys35strobe, &lisy_switch) == LISY_SW_BUFFER_SUCCESS))
+	{
+	swMatrixLISY35[sys35strobe] = lisy_switch;
         if ( ls80dbg.bitv.switches )
-        {
-           lisy80_debug("LISY35 Switch_reader: Ball one AND 2canplay activ: credit ignored");
-        }
-  }
-}
-
-//NOTE: system has has 6*8==40 switches in maximum, counting 1...48; ...
-//we use 'internal strobe 6' to handle special switches in the same way ( TEST=49,S33=50 )
-if (ret < 80) //ret is switchnumber
-      {
-
-        //calculate strobe & return
-        //Note: this is different from system80
-        strobe = ret / 8;
-        returnval = ret % 8;
-
-        //set the bit in the Matrix var according to action
-        // action 1 means set the bit
-        // any other means delete the bit
-        if (action ) //set bit
-                   SET_BIT(swMatrixLISY35[strobe+1],returnval);
-        else  //delete bit
-                   CLEAR_BIT(swMatrixLISY35[strobe+1],returnval);
-
-  } //if ret < 80 => update internal matrix
+         {
+	   sprintf(debugbuf,"PULL strobe:%d data:%d",sys35strobe,lisy_switch);
+	   lisy80_debug(debugbuf);
+         }
+	}
+ } //all strobes
 
 //do we need a 'special' routine to handle that switch?
 //system35 Test switch is separate but mapped to strobe:6 ret:7
@@ -780,9 +729,99 @@ if ( lisy35_has_soundcard )
     lisy_timer( 0, 1, 2);
  }
 } //freeplay option set
+}
 
-//if ( swMatrixLISY35[sys35strobe] != 0) printf("RTH back:%d\n",swMatrixLISY35[sys35strobe]);
-  //just give back Matrix-Byte, should be updated by now or next cycle
+/*
+  switch handler
+  called from by35.c in a range of 1..10ms (depnding on system load)
+  give back the value of the pinmame Matrix byte
+  swMatrix[0] is pinmame internal (sound?)
+  swMatrix[1..6] is bally,
+  swMatrix[7] is  'special switches' bit7:Test; bit6:S33;
+  *
+  we give back internal matrix byte  here
+*/
+unsigned char lisy35_switch_handler( int sys35col )
+{
+int ret;
+unsigned char strobe,returnval,action;
+int sys35strobe = 1;
+
+
+//get the truth strobe
+  if (sys35col) {
+    while ((sys35col & 0x01) == 0) {
+      sys35col >>= 1;
+      sys35strobe += 1;
+    }
+  }
+
+//read values from pic
+//check if there is an update first
+ret = lisy35_switch_reader( &action );
+//if debug mode is set we get our reedings from udp switchreader in additon
+//but do not overwrite real switches
+if ( ( ls80dbg.bitv.basic ) & ( ret == 80)) 
+ {
+   if ( ( ret = lisy_udp_switch_reader( &action, 0 )) != 80)
+   {
+     sprintf(debugbuf,"LISY35 Switch_reader: (UDP Server Data received: %d",ret);
+     lisy80_debug(debugbuf);
+     //we start internally with 0, so substract one
+     --ret;
+   }
+ }
+
+ //running on Starship? switchnumber has to be increased
+ if (( lisy_hardware_revision == 200 ) & ( ret != 80 ))
+		 lisy_home_ss_event_handler( LISY_HOME_SS_EVENT_SWITCH, ret+1, action, 0);
+
+//ignore credit switch if we running on Starship
+//and 2canplay lamp is ON
+if ( ( ret == 5 ) & (action == 1))
+{
+  if ( ( lisy_hardware_revision == 200 ) & ( lisy_home_ss_ignore_credit == 1))
+  {
+	ret = 80;
+
+        if ( ls80dbg.bitv.switches )
+        {
+           lisy80_debug("LISY35 Switch_reader: Ball one AND 2canplay activ: credit ignored");
+        }
+  }
+}
+
+//NOTE: system has has 6*8==40 switches in maximum, counting 1...48; ...
+//we use 'internal strobe 6' to handle special switches in the same way ( TEST=49,S33=50 )
+if (ret < 80) //ret is switchnumber
+      {
+
+        //calculate strobe & return
+        //Note: this is different from system80
+        strobe = ret / 8;
+        returnval = ret % 8;
+
+        //set the bit in the Matrix var according to action
+        // action 1 means set the bit
+        // any other means delete the bit
+	//we do that on 'PIC view' matrix
+        if (action ) //set bit
+                   SET_BIT(swMatrixLISY35PIC[strobe+1],returnval);
+        else  //delete bit
+                   CLEAR_BIT(swMatrixLISY35PIC[strobe+1],returnval);
+	//and push result to fifo of this strobe
+	if ( ( LISY_SW_BufferIn( strobe+1, swMatrixLISY35PIC[strobe+1]) != LISY_SW_BUFFER_SUCCESS))
+	  fprintf(stderr,"Error: Switchbuffer full!\n");
+        else if ( ls80dbg.bitv.switches )
+         {
+	   sprintf(debugbuf,"push strobe:%d data:%d",strobe+1,swMatrixLISY35PIC[strobe+1]);
+	   lisy80_debug(debugbuf);
+         }
+
+  } //if ret < 80 => update internal matrix
+
+
+  //give back Matrix-Byte of this strobe
   return(swMatrixLISY35[sys35strobe]);
 }
 

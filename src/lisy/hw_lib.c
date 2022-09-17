@@ -221,7 +221,7 @@ void lisymini_hwlib_init( void )
  lisy80_set_green_led(1);
 
  //init internal FIFO
- LISY80_BufferInit();
+ LISY_SW_BufferInit();
 }
 
 
@@ -270,7 +270,7 @@ void lisyapc_hwlib_init( void )
  if (ls80dbg.bitv.basic) lisy_api_print_hw_info();
 
  //init internal FIFO
- LISY80_BufferInit();
+ LISY_SW_BufferInit();
 }
 
 
@@ -434,7 +434,7 @@ void lisy_hwlib_init( void )
 
 
  //init internal FIFO
- LISY80_BufferInit();
+ LISY_SW_BufferInit();
 }
 
 //shutdown lisy80 Hardware
